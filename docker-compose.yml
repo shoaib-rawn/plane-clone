@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: miniplane-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: miniplane
+      POSTGRES_PASSWORD: localdev
+      POSTGRES_DB: miniplane
+    ports:
+      - "5433:5432" # 5433 on purpose: avoids clashing with a local Postgres
+    volumes:
+      - miniplane_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U miniplane"]
+      interval: 5s
+      retries: 5
+
+volumes:
+  miniplane_pgdata:
