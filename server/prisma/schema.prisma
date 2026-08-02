@@ -1,0 +1,199 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum WorkspaceRole {
+  ADMIN
+  MEMBER
+}
+
+enum ProjectRole {
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum StateGroup {
+  backlog
+  unstarted
+  started
+  completed
+  cancelled
+}
+
+enum IssuePriority {
+  URGENT
+  HIGH
+  MEDIUM
+  LOW
+  NONE
+}
+
+model Workspace {
+  id        String            @id @default(uuid())
+  name      String
+  slug      String            @unique
+  createdAt DateTime          @default(now()) @map("created_at")
+  updatedAt DateTime          @updatedAt @map("updated_at")
+  members   WorkspaceMember[]
+  projects  Project[]
+
+  @@map("workspaces")
+}
+
+model User {
+  id                   String            @id @default(uuid())
+  email                String            @unique
+  passwordHash         String            @map("password_hash")
+  displayName          String            @map("display_name")
+  avatarUrl            String?           @map("avatar_url")
+  isActive             Boolean           @default(true) @map("is_active")
+  lastLoginAt          DateTime?         @map("last_login_at")
+  createdAt            DateTime          @default(now()) @map("created_at")
+  updatedAt            DateTime          @updatedAt @map("updated_at")
+  workspaceMemberships WorkspaceMember[]
+  projectMemberships   ProjectMember[]   @relation("member")
+  membershipsGranted   ProjectMember[]   @relation("addedBy")
+  reportedIssues       Issue[]           @relation("reporter")
+  assignedIssues       Issue[]           @relation("assignee")
+  createdProjects      Project[]
+  comments             IssueComment[]
+  activities           IssueActivity[]
+
+  @@map("users")
+}
+
+model WorkspaceMember {
+  id          String        @id @default(uuid())
+  workspaceId String        @map("workspace_id")
+  userId      String        @map("user_id")
+  role        WorkspaceRole @default(MEMBER)
+  joinedAt    DateTime      @default(now()) @map("joined_at")
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@index([userId])
+  @@map("workspace_members")
+}
+
+model Project {
+  id             String          @id @default(uuid())
+  workspaceId    String          @map("workspace_id")
+  name           String
+  key            String
+  description    String?
+  issueCounter   Int             @default(0) @map("issue_counter")
+  defaultStateId String?         @map("default_state_id")
+  createdById    String          @map("created_by_id")
+  archivedAt     DateTime?       @map("archived_at")
+  deletedAt      DateTime?       @map("deleted_at")
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
+  workspace      Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdBy      User            @relation(fields: [createdById], references: [id])
+  members        ProjectMember[]
+  states         IssueState[]
+  issues         Issue[]
+
+  @@unique([workspaceId, key])
+  @@index([workspaceId])
+  @@map("projects")
+}
+
+model ProjectMember {
+  id        String      @id @default(uuid())
+  projectId String      @map("project_id")
+  userId    String      @map("user_id")
+  role      ProjectRole @default(MEMBER)
+  addedById String?     @map("added_by_id")
+  joinedAt  DateTime    @default(now()) @map("joined_at")
+  project   Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User        @relation("member", fields: [userId], references: [id], onDelete: Cascade)
+  addedBy   User?       @relation("addedBy", fields: [addedById], references: [id], onDelete: SetNull)
+
+  @@unique([projectId, userId])
+  @@index([userId])
+  @@map("project_members")
+}
+
+model IssueState {
+  id        String     @id @default(uuid())
+  projectId String     @map("project_id")
+  name      String
+  group     StateGroup
+  colour    String
+  position  Int
+  createdAt DateTime   @default(now()) @map("created_at")
+  project   Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  issues    Issue[]
+
+  @@unique([projectId, name])
+  @@index([projectId])
+  @@map("issue_states")
+}
+
+model Issue {
+  id          String          @id @default(uuid())
+  projectId   String          @map("project_id")
+  sequenceId  Int             @map("sequence_id")
+  title       String
+  description String?
+  stateId     String          @map("state_id")
+  priority    IssuePriority   @default(MEDIUM)
+  assigneeId  String?         @map("assignee_id")
+  createdById String          @map("created_by_id")
+  dueDate     DateTime?       @map("due_date") @db.Date
+  completedAt DateTime?       @map("completed_at")
+  deletedAt   DateTime?       @map("deleted_at")
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
+  project     Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  state       IssueState      @relation(fields: [stateId], references: [id])
+  assignee    User?           @relation("assignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  createdBy   User            @relation("reporter", fields: [createdById], references: [id])
+  comments    IssueComment[]
+  activities  IssueActivity[]
+
+  @@unique([projectId, sequenceId])
+  @@index([projectId, stateId])
+  @@index([projectId, assigneeId])
+  @@index([assigneeId])
+  @@map("issues")
+}
+
+model IssueComment {
+  id        String    @id @default(uuid())
+  issueId   String    @map("issue_id")
+  authorId  String    @map("author_id")
+  body      String
+  editedAt  DateTime? @map("edited_at")
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  issue     Issue     @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  author    User      @relation(fields: [authorId], references: [id])
+
+  @@index([issueId])
+  @@map("issue_comments")
+}
+
+model IssueActivity {
+  id        String   @id @default(uuid())
+  issueId   String   @map("issue_id")
+  actorId   String   @map("actor_id")
+  verb      String
+  field     String?
+  oldValue  String?  @map("old_value")
+  newValue  String?  @map("new_value")
+  createdAt DateTime @default(now()) @map("created_at")
+  issue     Issue    @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  actor     User     @relation(fields: [actorId], references: [id])
+
+  @@index([issueId, createdAt])
+  @@map("issue_activities")
+}
