@@ -2,10 +2,11 @@
 import express from 'express';
 import cors from 'cors';
 import { env } from './config/env.js';
+import { errorHandler } from './middleware/errorHandler.js';
+import { prisma } from './lib/prisma.js';
 
 export const app = express();
 
-// Middlewares
 app.use(
   cors({
     origin: env.CORS_ORIGIN,
@@ -15,7 +16,15 @@ app.use(
 
 app.use(express.json());
 
-// Public health check endpoint
-app.get('/health', (_req, res) => {
-  res.status(200).json({ status: 'ok' });
+// Public health check endpoint (verifies database connection per Day 5 spec)
+app.get('/health', async (_req, res, next) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.status(200).json({ status: 'ok', db: 'connected' });
+  } catch (err) {
+    next(err);
+  }
 });
+
+// Central error handler middleware (must be mounted as the LAST middleware)
+app.use(errorHandler);
