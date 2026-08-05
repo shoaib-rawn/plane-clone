@@ -21,4 +21,26 @@ if (!parsed.success) {
   process.exit(1); // fail loudly at boot, not quietly at 3am
 }
 
-export const env = parsed.data;
+const raw = parsed.data;
+
+export const config = {
+  env: raw.NODE_ENV,
+  server: {
+    port: raw.PORT,
+  },
+  database: {
+    url: raw.DATABASE_URL,
+  },
+  jwt: {
+    secret: raw.JWT_SECRET,
+    expiresIn: raw.JWT_EXPIRES_IN,
+  },
+  cors: {
+    origin: raw.CORS_ORIGIN,
+  },
+  bcrypt: {
+    rounds: raw.BCRYPT_ROUNDS,
+  },
+};
+
+export const env = raw;
