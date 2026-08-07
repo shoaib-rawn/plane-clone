@@ -3,9 +3,9 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../lib/prisma.js';
 import { config } from '../config/env.js';
-import { ConflictError } from '../lib/errors.js';
+import { ConflictError, UnauthorizedError } from '../lib/errors.js';
 import { toPublicUser, PublicUser } from '../lib/user.js';
-import { RegisterInput } from '../schemas/auth.schema.js';
+import { RegisterInput, LoginInput } from '../schemas/auth.schema.js';
 
 export async function registerUser(input: RegisterInput): Promise<{ user: PublicUser; token: string }> {
   // Check if email already registered
@@ -47,6 +47,29 @@ export async function registerUser(input: RegisterInput): Promise<{ user: Public
 
     return newUser;
   });
+
+  // Sign JWT token
+  const token = jwt.sign({ userId: user.id }, config.jwt.secret, {
+    expiresIn: config.jwt.expiresIn as jwt.SignOptions['expiresIn'],
+  });
+
+  return {
+    user: toPublicUser(user),
+    token,
+  };
+}
+
+export async function loginUser(input: LoginInput): Promise<{ user: PublicUser; token: string }> {
+  const user = await prisma.user.findUnique({
+    where: { email: input.email },
+  });
+
+  // Perform timing-safe password comparison
+  const isPasswordValid = user ? await bcrypt.compare(input.password, user.passwordHash) : false;
+
+  if (!user || !isPasswordValid || !user.isActive) {
+    throw UnauthorizedError('Invalid email or password', 'INVALID_CREDENTIALS');
+  }
 
   // Sign JWT token
   const token = jwt.sign({ userId: user.id }, config.jwt.secret, {
