@@ -1,9 +1,22 @@
 // server/src/lib/user.ts
 import { User } from '@prisma/client';
 
-export type PublicUser = Omit<User, 'passwordHash'>;
+export interface PublicUser {
+  id: string;
+  email: string;
+  displayName: string;
+  avatarUrl: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 export function toPublicUser(user: User): PublicUser {
-  const { passwordHash: _, ...publicUser } = user;
-  return publicUser;
+  return {
+    id: user.id,
+    email: user.email,
+    displayName: user.displayName,
+    avatarUrl: user.avatarUrl,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
+  };
 }

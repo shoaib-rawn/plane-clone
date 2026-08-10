@@ -27,7 +27,7 @@ export async function registerUser(input: RegisterInput): Promise<{ user: Public
       },
     });
 
-    // 3. Find default workspace
+    // 3. Find default workspace (slug: 'acme') to attach member
     const workspace = await tx.workspace.findUnique({
       where: { slug: 'acme' },
     });
@@ -72,4 +72,3 @@ export async function loginUser(input: LoginInput): Promise<{ user: PublicUser; 
     token,
   };
 }
-

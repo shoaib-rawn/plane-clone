@@ -4,6 +4,7 @@ import cors from 'cors';
 import { config } from './config/env.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { prisma } from './lib/prisma.js';
+import { apiRouter } from './routes/index.js';
 
 import { apiRouter } from './routes/index.js';
 
