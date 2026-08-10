@@ -1,23 +1,16 @@
 // server/src/controllers/user.controller.ts
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import { updateUserSchema } from '../schemas/user.schema.js';
 import * as userService from '../services/user.service.js';
+import { asyncHandler } from '../lib/asyncHandler.js';
 
-export async function updateMeController(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  try {
-    const userId = req.user!.id;
-    const validatedBody = updateUserSchema.parse(req.body);
+export const updateMeController = asyncHandler(async (req: Request, res: Response) => {
+  const userId = req.user!.id;
+  const validatedBody = updateUserSchema.parse(req.body);
 
-    const user = await userService.updateCurrentUser(userId, validatedBody);
+  const user = await userService.updateCurrentUser(userId, validatedBody);
 
-    return res.status(200).json({
-      data: { user },
-    });
-  } catch (err) {
-    next(err);
-  }
-}
+  return res.status(200).json({
+    data: { user },
+  });
+});
