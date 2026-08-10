@@ -6,8 +6,6 @@ import { errorHandler } from './middleware/errorHandler.js';
 import { prisma } from './lib/prisma.js';
 import { apiRouter } from './routes/index.js';
 
-import { apiRouter } from './routes/index.js';
-
 export const app = express();
 
 app.use(
