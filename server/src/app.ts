@@ -5,6 +5,8 @@ import { config } from './config/env.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { prisma } from './lib/prisma.js';
 
+import { apiRouter } from './routes/index.js';
+
 export const app = express();
 
 app.use(
@@ -26,5 +28,9 @@ app.get('/health', async (_req, res, next) => {
   }
 });
 
+// API Routes (v1)
+app.use('/api/v1', apiRouter);
+
 // Central error handler middleware (must be mounted as the LAST middleware)
 app.use(errorHandler);
+
