@@ -1,27 +1,24 @@
 // server/src/services/auth.service.ts
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
 import { prisma } from '../lib/prisma.js';
-import { config } from '../config/env.js';
 import { ConflictError, UnauthorizedError } from '../lib/errors.js';
 import { toPublicUser, PublicUser } from '../lib/user.js';
+import { hashPassword, verifyPassword, generateToken } from '../lib/auth.js';
 import { RegisterInput, LoginInput } from '../schemas/auth.schema.js';
 
 export async function registerUser(input: RegisterInput): Promise<{ user: PublicUser; token: string }> {
-  // Check if email already registered
-  const existingUser = await prisma.user.findUnique({
-    where: { email: input.email },
-  });
+  const passwordHash = await hashPassword(input.password);
 
-  if (existingUser) {
-    throw ConflictError('An account with this email already exists', 'EMAIL_TAKEN');
-  }
-
-  // Hash password
-  const passwordHash = await bcrypt.hash(input.password, config.bcrypt.rounds);
-
-  // Execute user creation & workspace membership in a transaction
   const user = await prisma.$transaction(async (tx) => {
+    // 1. Check existing user inside transaction block using tx
+    const existingUser = await tx.user.findUnique({
+      where: { email: input.email },
+    });
+
+    if (existingUser) {
+      throw ConflictError('An account with this email already exists', 'EMAIL_TAKEN');
+    }
+
+    // 2. Create new user
     const newUser = await tx.user.create({
       data: {
         email: input.email,
@@ -30,11 +27,12 @@ export async function registerUser(input: RegisterInput): Promise<{ user: Public
       },
     });
 
-    // Find default workspace (slug: 'acme') to attach member
+    // 3. Find default workspace (slug: 'acme') to attach member
     const workspace = await tx.workspace.findUnique({
       where: { slug: 'acme' },
     });
 
+    // 4. Assign workspace membership
     if (workspace) {
       await tx.workspaceMember.create({
         data: {
@@ -48,10 +46,7 @@ export async function registerUser(input: RegisterInput): Promise<{ user: Public
     return newUser;
   });
 
-  // Sign JWT token
-  const token = jwt.sign({ userId: user.id }, config.jwt.secret, {
-    expiresIn: config.jwt.expiresIn as jwt.SignOptions['expiresIn'],
-  });
+  const token = generateToken(user.id);
 
   return {
     user: toPublicUser(user),
@@ -64,17 +59,13 @@ export async function loginUser(input: LoginInput): Promise<{ user: PublicUser; 
     where: { email: input.email },
   });
 
-  // Perform timing-safe password comparison
-  const isPasswordValid = user ? await bcrypt.compare(input.password, user.passwordHash) : false;
+  const isPasswordValid = user ? await verifyPassword(input.password, user.passwordHash) : false;
 
   if (!user || !isPasswordValid || !user.isActive) {
     throw UnauthorizedError('Invalid email or password', 'INVALID_CREDENTIALS');
   }
 
-  // Sign JWT token
-  const token = jwt.sign({ userId: user.id }, config.jwt.secret, {
-    expiresIn: config.jwt.expiresIn as jwt.SignOptions['expiresIn'],
-  });
+  const token = generateToken(user.id);
 
   return {
     user: toPublicUser(user),
