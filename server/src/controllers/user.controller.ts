@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import { updateUserSchema } from '../schemas/user.schema.js';
 import * as userService from '../services/user.service.js';
 import { asyncHandler } from '../lib/asyncHandler.js';
-
+import { prisma } from '../lib/prisma.js';
 export const updateMeController = asyncHandler(async (req: Request, res: Response) => {
   const userId = req.user!.id;
   const validatedBody = updateUserSchema.parse(req.body);
@@ -13,4 +13,10 @@ export const updateMeController = asyncHandler(async (req: Request, res: Respons
   return res.status(200).json({
     data: { user },
   });
+});
+export const getAllUsersController = asyncHandler(async (req, res) => {
+  const users = await prisma.user.findMany({
+    select: { id: true, email: true, displayName: true } // passwordHash hide rakhein
+  });
+  return res.json({ data: users });
 });
