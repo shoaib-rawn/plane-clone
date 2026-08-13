@@ -7,41 +7,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum WorkspaceRole {
-  ADMIN
-  MEMBER
-}
-
-enum ProjectRole {
-  ADMIN
-  MEMBER
-  VIEWER
-}
-
-enum StateGroup {
-  backlog
-  unstarted
-  started
-  completed
-  cancelled
-}
-
-enum IssuePriority {
-  URGENT
-  HIGH
-  MEDIUM
-  LOW
-  NONE
-}
-
 model Workspace {
   id        String            @id @default(uuid())
   name      String
   slug      String            @unique
   createdAt DateTime          @default(now()) @map("created_at")
   updatedAt DateTime          @updatedAt @map("updated_at")
-  members   WorkspaceMember[]
   projects  Project[]
+  members   WorkspaceMember[]
 
   @@map("workspaces")
 }
@@ -56,14 +29,14 @@ model User {
   lastLoginAt          DateTime?         @map("last_login_at")
   createdAt            DateTime          @default(now()) @map("created_at")
   updatedAt            DateTime          @updatedAt @map("updated_at")
-  workspaceMemberships WorkspaceMember[]
-  projectMemberships   ProjectMember[]   @relation("member")
-  membershipsGranted   ProjectMember[]   @relation("addedBy")
-  reportedIssues       Issue[]           @relation("reporter")
-  assignedIssues       Issue[]           @relation("assignee")
-  createdProjects      Project[]
-  comments             IssueComment[]
   activities           IssueActivity[]
+  comments             IssueComment[]
+  assignedIssues       Issue[]           @relation("assignee")
+  reportedIssues       Issue[]           @relation("reporter")
+  membershipsGranted   ProjectMember[]   @relation("addedBy")
+  projectMemberships   ProjectMember[]   @relation("member")
+  createdProjects      Project[]
+  workspaceMemberships WorkspaceMember[]
 
   @@map("users")
 }
@@ -74,8 +47,8 @@ model WorkspaceMember {
   userId      String        @map("user_id")
   role        WorkspaceRole @default(MEMBER)
   joinedAt    DateTime      @default(now()) @map("joined_at")
-  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@unique([workspaceId, userId])
   @@index([userId])
@@ -95,11 +68,11 @@ model Project {
   deletedAt      DateTime?       @map("deleted_at")
   createdAt      DateTime        @default(now()) @map("created_at")
   updatedAt      DateTime        @updatedAt @map("updated_at")
-  workspace      Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  createdBy      User            @relation(fields: [createdById], references: [id])
-  members        ProjectMember[]
   states         IssueState[]
   issues         Issue[]
+  members        ProjectMember[]
+  createdBy      User            @relation(fields: [createdById], references: [id])
+  workspace      Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@unique([workspaceId, key])
   @@index([workspaceId])
@@ -113,9 +86,9 @@ model ProjectMember {
   role      ProjectRole @default(MEMBER)
   addedById String?     @map("added_by_id")
   joinedAt  DateTime    @default(now()) @map("joined_at")
+  addedBy   User?       @relation("addedBy", fields: [addedById], references: [id])
   project   Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
   user      User        @relation("member", fields: [userId], references: [id], onDelete: Cascade)
-  addedBy   User?       @relation("addedBy", fields: [addedById], references: [id], onDelete: SetNull)
 
   @@unique([projectId, userId])
   @@index([userId])
@@ -153,12 +126,12 @@ model Issue {
   deletedAt   DateTime?       @map("deleted_at")
   createdAt   DateTime        @default(now()) @map("created_at")
   updatedAt   DateTime        @updatedAt @map("updated_at")
+  activities  IssueActivity[]
+  comments    IssueComment[]
+  assignee    User?           @relation("assignee", fields: [assigneeId], references: [id])
+  createdBy   User            @relation("reporter", fields: [createdById], references: [id])
   project     Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
   state       IssueState      @relation(fields: [stateId], references: [id])
-  assignee    User?           @relation("assignee", fields: [assigneeId], references: [id], onDelete: SetNull)
-  createdBy   User            @relation("reporter", fields: [createdById], references: [id])
-  comments    IssueComment[]
-  activities  IssueActivity[]
 
   @@unique([projectId, sequenceId])
   @@index([projectId, stateId])
@@ -175,8 +148,8 @@ model IssueComment {
   editedAt  DateTime? @map("edited_at")
   deletedAt DateTime? @map("deleted_at")
   createdAt DateTime  @default(now()) @map("created_at")
-  issue     Issue     @relation(fields: [issueId], references: [id], onDelete: Cascade)
   author    User      @relation(fields: [authorId], references: [id])
+  issue     Issue     @relation(fields: [issueId], references: [id], onDelete: Cascade)
 
   @@index([issueId])
   @@map("issue_comments")
@@ -191,9 +164,36 @@ model IssueActivity {
   oldValue  String?  @map("old_value")
   newValue  String?  @map("new_value")
   createdAt DateTime @default(now()) @map("created_at")
-  issue     Issue    @relation(fields: [issueId], references: [id], onDelete: Cascade)
   actor     User     @relation(fields: [actorId], references: [id])
+  issue     Issue    @relation(fields: [issueId], references: [id], onDelete: Cascade)
 
   @@index([issueId, createdAt])
   @@map("issue_activities")
+}
+
+enum WorkspaceRole {
+  ADMIN
+  MEMBER
+}
+
+enum ProjectRole {
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum StateGroup {
+  backlog
+  unstarted
+  started
+  completed
+  cancelled
+}
+
+enum IssuePriority {
+  URGENT
+  HIGH
+  MEDIUM
+  LOW
+  NONE
 }
