@@ -8,7 +8,6 @@ export interface PublicUser {
   avatarUrl: string | null;
   createdAt: Date;
   updatedAt: Date;
-
 }
 
 export function toPublicUser(user: User): PublicUser {
@@ -19,6 +18,5 @@ export function toPublicUser(user: User): PublicUser {
     avatarUrl: user.avatarUrl,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
-
   };
 }
