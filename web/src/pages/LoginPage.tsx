@@ -37,7 +37,6 @@ const LoginPage = () => {
 
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
-  // Login API
   const loginMutation = useMutation({
     mutationFn: async (userData: { email: string; password: string }) => {
       const response = await fetch("http://localhost:4000/api/v1/auth/login", {
@@ -68,27 +67,17 @@ const LoginPage = () => {
       return data;
     },
 
-    // Successful login
     onSuccess: (data) => {
       console.log("Login successful:", data);
 
       setError("");
       setFieldErrors({});
 
-      /*
-        Backend response expected:
-
-        data.data.token
-        data.data.user.displayName
-      */
-
       const token = data.data.token;
       const userName = data.data.user.displayName;
 
-      // Store token
       localStorage.setItem("token", token);
 
-      // Store authentication information in Redux
       dispatch(
         login({
           token,
@@ -96,18 +85,15 @@ const LoginPage = () => {
         }),
       );
 
-      // Navigate after successful login
       navigate("/dashboard");
     },
 
-    // API error
     onError: (error: ApiError) => {
       console.log("Login error:", error);
 
       setError("");
       setFieldErrors({});
 
-      // 422 = validation errors
       if (error.status === 422) {
         const errors = error.data?.errors;
 
@@ -122,7 +108,6 @@ const LoginPage = () => {
         return;
       }
 
-      // Other server errors
       setError(error.message || "Something went wrong. Please try again.");
     },
   });
@@ -133,34 +118,13 @@ const LoginPage = () => {
     setError("");
     setFieldErrors({});
 
-    /*
-      Email validation
-
-      Examples:
-
-      john@gmail.com       ✅
-      john123@gmail.com    ✅
-      farhan.qureshi@gmail.com ✅
-
-      123john@gmail.com    ❌
-      @gmail.com           ❌
-      john@gmail           ❌
-      john@gmail.xyz       ❌
-
-      First character must be a letter.
-      After that letters/numbers/dot/underscore/etc are allowed.
-      Domain must contain .com
-    */
-
     const emailRegex = /^[A-Za-z][A-Za-z0-9._%+-]*@[A-Za-z][A-Za-z0-9-]*\.com$/;
 
-    // Empty fields
     if (!email.trim() || !password) {
       setError("Email and password are required.");
       return;
     }
 
-    // Email validation
     if (!emailRegex.test(email)) {
       setFieldErrors({
         email: "Please enter a valid email address.",
@@ -169,7 +133,6 @@ const LoginPage = () => {
       return;
     }
 
-    // Password validation
     if (password.length < 8) {
       setFieldErrors({
         password: "Password must be at least 8 characters.",
@@ -178,7 +141,6 @@ const LoginPage = () => {
       return;
     }
 
-    // API call
     loginMutation.mutate({
       email: email.trim(),
       password,
@@ -188,7 +150,6 @@ const LoginPage = () => {
   return (
     <div className="signin-page">
       <div className="signin-card">
-        {/* Logo & Brand */}
         <div className="brand">
           <div className="brand-logo">
             <CheckSquare size={28} strokeWidth={2.5} />
@@ -197,16 +158,13 @@ const LoginPage = () => {
           <h1>Miniplan</h1>
         </div>
 
-        {/* Heading */}
         <div className="signin-heading">
           <h2>Sign in to your workspace</h2>
 
           <p>Welcome back! Please enter your details.</p>
         </div>
 
-        {/* Form */}
         <form className="signin-form" onSubmit={handleSignIn}>
-          {/* Email */}
           <div className="input-group">
             <label htmlFor="email">Email</label>
 
@@ -228,13 +186,11 @@ const LoginPage = () => {
               }}
             />
 
-            {/* Email field error */}
             {fieldErrors.email && (
               <p className="field-error">{fieldErrors.email}</p>
             )}
           </div>
 
-          {/* Password */}
           <div className="input-group">
             <label htmlFor="password">Password</label>
 
@@ -267,16 +223,13 @@ const LoginPage = () => {
               </button>
             </div>
 
-            {/* Password field error */}
             {fieldErrors.password && (
               <p className="field-error">{fieldErrors.password}</p>
             )}
           </div>
 
-          {/* General Server Error */}
           {error && <p className="error-message">{error}</p>}
 
-          {/* Sign In Button */}
           <button
             type="submit"
             className="signin-button"
@@ -294,7 +247,6 @@ const LoginPage = () => {
           </button>
         </form>
 
-        {/* Register */}
         <div className="register-text">
           <span>No account yet?</span>
 

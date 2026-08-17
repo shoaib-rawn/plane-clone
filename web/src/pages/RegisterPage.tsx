@@ -24,7 +24,6 @@ const RegisterPage = () => {
 
   const [error, setError] = useState<string>("");
 
-  // Register API
   const registerMutation = useMutation({
     mutationFn: async (userData: {
       email: string;
@@ -61,7 +60,6 @@ const RegisterPage = () => {
       return data;
     },
 
-    // Registration successful
     onSuccess: (data) => {
       console.log("Registration successful:", data);
 
@@ -70,16 +68,9 @@ const RegisterPage = () => {
       navigate("/login");
     },
 
-    // Registration failed
     onError: (error: RegisterError) => {
       console.log("Registration error:", error);
 
-      /*
-       * 409 = Conflict
-       *
-       * Usually backend uses 409 when
-       * email already exists.
-       */
       if (error.status === 409) {
         setError(
           "User already exists with this email. Please use another email address.",
@@ -88,10 +79,6 @@ const RegisterPage = () => {
         return;
       }
 
-      /*
-       * If backend sends a duplicate-user
-       * message with another status code.
-       */
       const message = error.message.toLowerCase();
 
       if (
@@ -107,7 +94,6 @@ const RegisterPage = () => {
         return;
       }
 
-      // Other backend errors
       setError(error.message || "Registration failed. Please try again.");
     },
   });
@@ -115,16 +101,13 @@ const RegisterPage = () => {
   const handleRegister = (): void => {
     setError("");
 
-    // Empty fields
     if (!name.trim() || !email.trim() || !password || !confirmPassword) {
       setError("Please fill in all fields.");
       return;
     }
 
-    // Email validation
     const emailRegex = /^[A-Za-z][A-Za-z0-9._%+-]*@[A-Za-z][A-Za-z0-9-]*\.com$/;
 
-    // Password validation
     const passwordRegex =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
@@ -145,10 +128,8 @@ const RegisterPage = () => {
       return;
     }
 
-    // Clear previous error
     setError("");
 
-    // API call
     registerMutation.mutate({
       email: email.trim(),
       password,
@@ -159,7 +140,6 @@ const RegisterPage = () => {
   return (
     <div className="register-page">
       <div className="register-card">
-        {/* Logo & Brand */}
         <div className="register-brand">
           <div className="register-logo">
             <CheckSquare size={27} strokeWidth={2.5} />
@@ -168,16 +148,13 @@ const RegisterPage = () => {
           <h1>Miniplan</h1>
         </div>
 
-        {/* Heading */}
         <div className="register-heading">
           <h2>Create your account</h2>
 
           <p>Get started by creating your workspace account.</p>
         </div>
 
-        {/* Form */}
         <div className="register-form">
-          {/* Name */}
           <div className="register-input-group">
             <label htmlFor="name">Full name</label>
 
@@ -194,7 +171,6 @@ const RegisterPage = () => {
             />
           </div>
 
-          {/* Email */}
           <div className="register-input-group">
             <label htmlFor="email">Email</label>
 
@@ -211,7 +187,6 @@ const RegisterPage = () => {
             />
           </div>
 
-          {/* Password */}
           <div className="register-input-group">
             <label htmlFor="password">Password</label>
 
@@ -239,7 +214,6 @@ const RegisterPage = () => {
             </div>
           </div>
 
-          {/* Confirm Password */}
           <div className="register-input-group">
             <label htmlFor="confirmPassword">Confirm password</label>
 
@@ -271,10 +245,8 @@ const RegisterPage = () => {
             </div>
           </div>
 
-          {/* Error */}
           {error && <p className="register-error">{error}</p>}
 
-          {/* Create Account */}
           <button
             type="button"
             className="register-button"
@@ -293,7 +265,6 @@ const RegisterPage = () => {
           </button>
         </div>
 
-        {/* Login */}
         <div className="login-text">
           <span>Already have an account?</span>
 

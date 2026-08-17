@@ -1,12 +1,9 @@
-import type { RootState } from "../store/store";
-import { useSelector } from "react-redux";
-
+import "../styling/Dashboard.css";
 const Dashboard = () => {
-  const userName = useSelector((state: RootState) => state.auth.userName);
   return (
-    <>
-      <h1>welcom back {userName}</h1>
-    </>
+    <div className="dashboard">
+      <h1>Content show here</h1>
+    </div>
   );
 };
 
