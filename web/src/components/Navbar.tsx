@@ -1,4 +1,4 @@
-import { Bell, LogOut, Search, User } from "lucide-react";
+import { Bell, Search } from "lucide-react";
 
 import "../styling/layout/Navbar.css";
 import { useSelector } from "react-redux";

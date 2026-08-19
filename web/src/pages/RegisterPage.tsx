@@ -1,8 +1,14 @@
 import { useState } from "react";
-import { Eye, EyeOff, CheckSquare, LoaderCircle } from "lucide-react";
+import { CheckSquare, LoaderCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 
+import FormInput from "../components/FormInput";
+import { registerUser, type ApiError } from "../features/auth/api/authApi";
+import {
+  isStrongPassword,
+  isValidEmail,
+} from "../features/auth/utils/validation";
 import "../styling/RegisterPage.css";
 
 interface RegisterError extends Error {
@@ -29,48 +35,14 @@ const RegisterPage = () => {
       email: string;
       password: string;
       displayName: string;
-    }) => {
-      const response = await fetch(
-        "http://localhost:4000/api/v1/auth/register",
-        {
-          method: "POST",
+    }) => registerUser(userData),
 
-          headers: {
-            "Content-Type": "application/json",
-          },
-
-          body: JSON.stringify(userData),
-        },
-      );
-
-      const data = await response.json();
-
-      console.log("Register API response:", data);
-
-      if (!response.ok) {
-        const apiError = new Error(
-          data.message || "Registration failed",
-        ) as RegisterError;
-
-        apiError.status = response.status;
-
-        throw apiError;
-      }
-
-      return data;
-    },
-
-    onSuccess: (data) => {
-      console.log("Registration successful:", data);
-
+    onSuccess: () => {
       setError("");
-
       navigate("/login");
     },
 
-    onError: (error: RegisterError) => {
-      console.log("Registration error:", error);
-
+    onError: (error: RegisterError & ApiError) => {
       if (error.status === 409) {
         setError(
           "User already exists with this email. Please use another email address.",
@@ -106,17 +78,12 @@ const RegisterPage = () => {
       return;
     }
 
-    const emailRegex = /^[A-Za-z][A-Za-z0-9._%+-]*@[A-Za-z][A-Za-z0-9-]*\.com$/;
-
-    const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-
-    if (!emailRegex.test(email.trim())) {
+    if (!isValidEmail(email)) {
       setError("Please enter a valid email address.");
       return;
     }
 
-    if (!passwordRegex.test(password)) {
+    if (!isStrongPassword(password)) {
       setError(
         "Password must contain at least 8 characters, one uppercase, one lowercase, one number and one special character.",
       );
@@ -127,8 +94,6 @@ const RegisterPage = () => {
       setError("Passwords do not match.");
       return;
     }
-
-    setError("");
 
     registerMutation.mutate({
       email: email.trim(),
@@ -150,100 +115,76 @@ const RegisterPage = () => {
 
         <div className="register-heading">
           <h2>Create your account</h2>
-
           <p>Get started by creating your workspace account.</p>
         </div>
 
         <div className="register-form">
-          <div className="register-input-group">
-            <label htmlFor="name">Full name</label>
+          <FormInput
+            id="name"
+            label="Full name"
+            placeholder="Enter your name"
+            value={name}
+            autoComplete="name"
+            containerClassName="register-input-group"
+            onChange={(event) => {
+              setName(event.target.value);
+              setError("");
+            }}
+          />
 
-            <input
-              id="name"
-              type="text"
-              placeholder="Enter your name"
-              value={name}
-              autoComplete="name"
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                setName(e.target.value);
-                setError("");
-              }}
-            />
-          </div>
+          <FormInput
+            id="email"
+            label="Email"
+            type="email"
+            placeholder="Enter your email"
+            value={email}
+            autoComplete="email"
+            containerClassName="register-input-group"
+            onChange={(event) => {
+              setEmail(event.target.value);
+              setError("");
+            }}
+          />
 
-          <div className="register-input-group">
-            <label htmlFor="email">Email</label>
+          <FormInput
+            id="password"
+            label="Password"
+            type="password"
+            placeholder="Create a password"
+            value={password}
+            autoComplete="new-password"
+            containerClassName="register-input-group"
+            passwordWrapperClassName="register-password-wrapper"
+            passwordToggleClassName="register-password-toggle"
+            showPasswordToggle
+            isPasswordVisible={showPassword}
+            onTogglePassword={() => setShowPassword((current) => !current)}
+            onChange={(event) => {
+              setPassword(event.target.value);
+              setError("");
+            }}
+          />
 
-            <input
-              id="email"
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              autoComplete="email"
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                setEmail(e.target.value);
-                setError("");
-              }}
-            />
-          </div>
-
-          <div className="register-input-group">
-            <label htmlFor="password">Password</label>
-
-            <div className="register-password-wrapper">
-              <input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="Create a password"
-                value={password}
-                autoComplete="new-password"
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  setPassword(e.target.value);
-                  setError("");
-                }}
-              />
-
-              <button
-                type="button"
-                className="register-password-toggle"
-                onClick={() => setShowPassword(!showPassword)}
-                aria-label={showPassword ? "Hide password" : "Show password"}
-              >
-                {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
-              </button>
-            </div>
-          </div>
-
-          <div className="register-input-group">
-            <label htmlFor="confirmPassword">Confirm password</label>
-
-            <div className="register-password-wrapper">
-              <input
-                id="confirmPassword"
-                type={showConfirmPassword ? "text" : "password"}
-                placeholder="Confirm your password"
-                value={confirmPassword}
-                autoComplete="new-password"
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  setConfirmPassword(e.target.value);
-                  setError("");
-                }}
-              />
-
-              <button
-                type="button"
-                className="register-password-toggle"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                aria-label={
-                  showConfirmPassword
-                    ? "Hide confirm password"
-                    : "Show confirm password"
-                }
-              >
-                {showConfirmPassword ? <EyeOff size={19} /> : <Eye size={19} />}
-              </button>
-            </div>
-          </div>
+          <FormInput
+            id="confirmPassword"
+            label="Confirm password"
+            type="password"
+            placeholder="Confirm your password"
+            value={confirmPassword}
+            autoComplete="new-password"
+            containerClassName="register-input-group"
+            passwordWrapperClassName="register-password-wrapper"
+            passwordToggleClassName="register-password-toggle"
+            showPasswordToggle
+            isPasswordVisible={showConfirmPassword}
+            onTogglePassword={() =>
+              setShowConfirmPassword((current) => !current)
+            }
+            onChange={(event) => {
+              setConfirmPassword(event.target.value);
+              setError("");
+            }}
+          />
 
           {error && <p className="register-error">{error}</p>}
 
@@ -256,7 +197,6 @@ const RegisterPage = () => {
             {registerMutation.isPending ? (
               <>
                 <LoaderCircle size={18} className="register-spinner" />
-
                 <span>Creating account...</span>
               </>
             ) : (
@@ -267,7 +207,6 @@ const RegisterPage = () => {
 
         <div className="login-text">
           <span>Already have an account?</span>
-
           <button type="button" onClick={() => navigate("/login")}>
             Sign in
           </button>
