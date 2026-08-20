@@ -1,4 +1,4 @@
-import type { LoginResponse } from "./types/typesAuth";
+import type { LoginResponse } from "../types/typesAuth";
 
 export const apiClient = async <T>(
   url: string,

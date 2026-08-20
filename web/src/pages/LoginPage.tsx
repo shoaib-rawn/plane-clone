@@ -1,17 +1,15 @@
 import { useState } from "react";
 import { CheckSquare, LoaderCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
-import { useDispatch } from "react-redux";
-
 import FormInput from "../components/FormInput";
-import { loginUser } from "../features/auth/api/authApi";
+
 import {
   hasMinimumPasswordLength,
   isValidEmail,
 } from "../features/auth/utils/validation";
-import { login } from "../store/slices/authSlice";
+
 import "../styling/LoginPage.css";
+import { useLogin } from "../features/auth/hooks/useLogin";
 
 interface FieldErrors {
   email?: string;
@@ -19,7 +17,6 @@ interface FieldErrors {
 }
 
 const LoginPage = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState<string>("");
@@ -28,33 +25,7 @@ const LoginPage = () => {
   const [error, setError] = useState<string>("");
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
-  const loginMutation = useMutation({
-    mutationFn: (userData: { email: string; password: string }) =>
-      loginUser(userData),
-
-    onSuccess: (data) => {
-      setError("");
-      setFieldErrors({});
-
-      const token = data.data.token;
-      const userName = data.data.user.displayName;
-
-      localStorage.setItem("token", token);
-
-      dispatch(
-        login({
-          token,
-          userName,
-        }),
-      );
-
-      navigate("/dashboard");
-    },
-
-    onError: (error) => {
-      setError(error.message);
-    },
-  });
+  const loginMutation = useLogin();
 
   const handleSignIn = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
@@ -86,10 +57,23 @@ const LoginPage = () => {
     }
 
     // API call
-    loginMutation.mutate({
-      email: email.trim(),
-      password,
-    });
+    loginMutation.mutate(
+      {
+        email: email.trim(),
+        password,
+      },
+      {
+        onSuccess: () => {
+          setError("");
+          setFieldErrors({});
+          navigate("/dashboard");
+        },
+
+        onError: (error) => {
+          setError(error.message);
+        },
+      },
+    );
   };
 
   return (

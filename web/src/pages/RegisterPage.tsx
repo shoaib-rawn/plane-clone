@@ -1,15 +1,15 @@
 import { useState } from "react";
 import { CheckSquare, LoaderCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
 
 import FormInput from "../components/FormInput";
-import { registerUser } from "../features/auth/api/authApi";
+
 import {
   isStrongPassword,
   isValidEmail,
 } from "../features/auth/utils/validation";
 import "../styling/RegisterPage.css";
+import { useRegister } from "../features/auth/hooks/useRegister";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -28,20 +28,7 @@ const RegisterPage = () => {
   const [error, setError] = useState("");
 
   // Register API
-  const registerMutation = useMutation({
-    mutationFn: registerUser,
-
-    // Registration successful
-    onSuccess: () => {
-      setError("");
-      navigate("/login");
-    },
-
-    // Registration failed
-    onError: (error) => {
-      setError(error.message || "Registration failed. Please try again.");
-    },
-  });
+  const registerMutation = useRegister();
 
   const handleRegister = () => {
     // Clear previous error
@@ -74,11 +61,23 @@ const RegisterPage = () => {
     }
 
     // 5. Send registration request
-    registerMutation.mutate({
-      email: email.trim(),
-      password,
-      displayName: name.trim(),
-    });
+    registerMutation.mutate(
+      {
+        email: email.trim(),
+        password,
+        displayName: name.trim(),
+      },
+      {
+        onSuccess: () => {
+          setError("");
+          navigate("/login");
+        },
+
+        onError: (error) => {
+          setError(error.message);
+        },
+      },
+    );
   };
 
   return (

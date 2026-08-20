@@ -1,6 +1,7 @@
 import { apiClient } from "./authApiClient";
-import type { LoginPayload, LoginResponse, RegisterPayload } from "./types/typesAuth";
-import { AUTH_BASE_URL } from "./url/baseUrl";
+import type { LoginPayload, LoginResponse, RegisterPayload } from "../types/typesAuth";
+import { AUTH_BASE_URL } from "../url/baseUrl";
+
 
 
 
