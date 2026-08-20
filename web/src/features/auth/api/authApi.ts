@@ -1,73 +1,34 @@
-export interface LoginPayload {
-  email: string;
-  password: string;
-}
+import { apiClient } from "./authApiClient";
+import type { LoginPayload, LoginResponse, RegisterPayload } from "./types/typesAuth";
+import { AUTH_BASE_URL } from "./url/baseUrl";
 
-export interface RegisterPayload {
-  email: string;
-  password: string;
-  displayName: string;
-}
 
-export interface ApiError extends Error {
-  status?: number;
-  data?: {
-    message?: string;
-    errors?: {
-      email?: string | string[];
-      password?: string | string[];
-    };
-  };
-}
-
-const AUTH_BASE_URL = "http://localhost:4000/api/v1/auth";
 
 export const loginUser = async (userData: LoginPayload) => {
-  const response = await fetch(`${AUTH_BASE_URL}/login`, {
+  return apiClient<LoginResponse>(`${AUTH_BASE_URL}/login`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify(userData),
-  });
+  })
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    const apiError = new Error(
-      data.message || "Invalid email or password.",
-    ) as ApiError;
-
-    apiError.status = response.status;
-    apiError.data = data;
-
-    throw apiError;
-  }
-
-  return data;
 };
 
 export const registerUser = async (userData: RegisterPayload) => {
-  const response = await fetch(`${AUTH_BASE_URL}/register`, {
+ return apiClient(`${AUTH_BASE_URL}/register`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(userData),
-  });
+  body: JSON.stringify(userData),
+  })
+};
 
-  const data = await response.json();
+export const getMe = async () => {
+  const token = localStorage.getItem("token");
 
-  if (!response.ok) {
-    const apiError = new Error(
-      data.message || "Registration failed",
-    ) as ApiError;
-
-    apiError.status = response.status;
-    apiError.data = data;
-
-    throw apiError;
+  if (!token) {
+    throw new Error("No authentication token found");
   }
-
-  return data;
+  return apiClient(`${AUTH_BASE_URL}/me`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 };

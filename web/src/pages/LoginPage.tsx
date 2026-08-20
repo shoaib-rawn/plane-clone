@@ -5,7 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
 
 import FormInput from "../components/FormInput";
-import { loginUser, type ApiError } from "../features/auth/api/authApi";
+import { loginUser } from "../features/auth/api/authApi";
 import {
   hasMinimumPasswordLength,
   isValidEmail,
@@ -29,7 +29,7 @@ const LoginPage = () => {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   const loginMutation = useMutation({
-    mutationFn: async (userData: { email: string; password: string }) =>
+    mutationFn: (userData: { email: string; password: string }) =>
       loginUser(userData),
 
     onSuccess: (data) => {
@@ -51,54 +51,41 @@ const LoginPage = () => {
       navigate("/dashboard");
     },
 
-    onError: (error: ApiError) => {
-      setError("");
-      setFieldErrors({});
-
-      if (error.status === 422) {
-        const errors = error.data?.errors;
-
-        setFieldErrors({
-          email: Array.isArray(errors?.email) ? errors.email[0] : errors?.email,
-          password: Array.isArray(errors?.password)
-            ? errors.password[0]
-            : errors?.password,
-        });
-
-        return;
-      }
-
-      setError(error.message || "Something went wrong. Please try again.");
+    onError: (error) => {
+      setError(error.message);
     },
   });
 
   const handleSignIn = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
 
+    // Clear old errors
     setError("");
     setFieldErrors({});
 
+    // Required fields
     if (!email.trim() || !password) {
       setError("Email and password are required.");
       return;
     }
 
+    // Email validation
     if (!isValidEmail(email)) {
       setFieldErrors({
         email: "Please enter a valid email address.",
       });
-
       return;
     }
 
+    // Password validation
     if (!hasMinimumPasswordLength(password)) {
       setFieldErrors({
         password: "Password must be at least 8 characters.",
       });
-
       return;
     }
 
+    // API call
     loginMutation.mutate({
       email: email.trim(),
       password,
@@ -133,6 +120,7 @@ const LoginPage = () => {
             onChange={(event) => {
               setEmail(event.target.value);
               setError("");
+
               setFieldErrors((previous) => ({
                 ...previous,
                 email: undefined,
@@ -154,6 +142,7 @@ const LoginPage = () => {
             onChange={(event) => {
               setPassword(event.target.value);
               setError("");
+
               setFieldErrors((previous) => ({
                 ...previous,
                 password: undefined,
@@ -181,6 +170,7 @@ const LoginPage = () => {
 
         <div className="register-text">
           <span>No account yet?</span>
+
           <button type="button" onClick={() => navigate("/register")}>
             Create one
           </button>

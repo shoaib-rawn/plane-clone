@@ -4,97 +4,76 @@ import { useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 
 import FormInput from "../components/FormInput";
-import { registerUser, type ApiError } from "../features/auth/api/authApi";
+import { registerUser } from "../features/auth/api/authApi";
 import {
   isStrongPassword,
   isValidEmail,
 } from "../features/auth/utils/validation";
 import "../styling/RegisterPage.css";
 
-interface RegisterError extends Error {
-  status?: number;
-}
-
 const RegisterPage = () => {
   const navigate = useNavigate();
 
-  const [name, setName] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  // Form fields
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
-  const [showPassword, setShowPassword] = useState<boolean>(false);
+  // Password visibility
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const [showConfirmPassword, setShowConfirmPassword] =
-    useState<boolean>(false);
+  // Error message
+  const [error, setError] = useState("");
 
-  const [error, setError] = useState<string>("");
-
+  // Register API
   const registerMutation = useMutation({
-    mutationFn: async (userData: {
-      email: string;
-      password: string;
-      displayName: string;
-    }) => registerUser(userData),
+    mutationFn: registerUser,
 
+    // Registration successful
     onSuccess: () => {
       setError("");
       navigate("/login");
     },
 
-    onError: (error: RegisterError & ApiError) => {
-      if (error.status === 409) {
-        setError(
-          "User already exists with this email. Please use another email address.",
-        );
-
-        return;
-      }
-
-      const message = error.message.toLowerCase();
-
-      if (
-        message.includes("already exists") ||
-        message.includes("already registered") ||
-        message.includes("duplicate") ||
-        message.includes("email already")
-      ) {
-        setError(
-          "User already exists with this email. Please use another email address.",
-        );
-
-        return;
-      }
-
+    // Registration failed
+    onError: (error) => {
       setError(error.message || "Registration failed. Please try again.");
     },
   });
 
-  const handleRegister = (): void => {
+  const handleRegister = () => {
+    // Clear previous error
     setError("");
 
+    // 1. Check empty fields
     if (!name.trim() || !email.trim() || !password || !confirmPassword) {
       setError("Please fill in all fields.");
       return;
     }
 
+    // 2. Check email
     if (!isValidEmail(email)) {
       setError("Please enter a valid email address.");
       return;
     }
 
+    // 3. Check password strength
     if (!isStrongPassword(password)) {
       setError(
-        "Password must contain at least 8 characters, one uppercase, one lowercase, one number and one special character.",
+        "Password must have 8+ characters, uppercase, lowercase, number and special character.",
       );
       return;
     }
 
+    // 4. Check password confirmation
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
 
+    // 5. Send registration request
     registerMutation.mutate({
       email: email.trim(),
       password,
@@ -105,6 +84,7 @@ const RegisterPage = () => {
   return (
     <div className="register-page">
       <div className="register-card">
+        {/* Brand */}
         <div className="register-brand">
           <div className="register-logo">
             <CheckSquare size={27} strokeWidth={2.5} />
@@ -113,12 +93,15 @@ const RegisterPage = () => {
           <h1>Miniplan</h1>
         </div>
 
+        {/* Heading */}
         <div className="register-heading">
           <h2>Create your account</h2>
           <p>Get started by creating your workspace account.</p>
         </div>
 
+        {/* Form */}
         <div className="register-form">
+          {/* Name */}
           <FormInput
             id="name"
             label="Full name"
@@ -132,6 +115,7 @@ const RegisterPage = () => {
             }}
           />
 
+          {/* Email */}
           <FormInput
             id="email"
             label="Email"
@@ -146,6 +130,7 @@ const RegisterPage = () => {
             }}
           />
 
+          {/* Password */}
           <FormInput
             id="password"
             label="Password"
@@ -165,6 +150,7 @@ const RegisterPage = () => {
             }}
           />
 
+          {/* Confirm Password */}
           <FormInput
             id="confirmPassword"
             label="Confirm password"
@@ -186,8 +172,10 @@ const RegisterPage = () => {
             }}
           />
 
+          {/* Error */}
           {error && <p className="register-error">{error}</p>}
 
+          {/* Submit */}
           <button
             type="button"
             className="register-button"
@@ -205,8 +193,10 @@ const RegisterPage = () => {
           </button>
         </div>
 
+        {/* Login */}
         <div className="login-text">
           <span>Already have an account?</span>
+
           <button type="button" onClick={() => navigate("/login")}>
             Sign in
           </button>
