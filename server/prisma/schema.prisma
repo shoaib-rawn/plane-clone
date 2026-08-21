@@ -89,6 +89,7 @@ model ProjectMember {
   addedBy   User?       @relation("addedBy", fields: [addedById], references: [id])
   project   Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
   user      User        @relation("member", fields: [userId], references: [id], onDelete: Cascade)
+  deletedAt DateTime?   @map("deleted_at")
 
   @@unique([projectId, userId])
   @@index([userId])

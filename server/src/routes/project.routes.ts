@@ -10,9 +10,11 @@
 import { Router } from 'express';
 import { createProjectController, getProjectsController } from '../controllers/project.controller.js';
 import { requireAuth } from '../middleware/requireAuth.js';
+import { projectMemberRouter } from './projectMember.routes.js';
 
 export const projectRouter = Router();
 
 projectRouter.post('/', requireAuth, createProjectController);
 projectRouter.get('/', requireAuth, getProjectsController);
+projectRouter.use('/:projectId/members', projectMemberRouter);
 
