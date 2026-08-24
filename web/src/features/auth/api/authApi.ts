@@ -1,4 +1,4 @@
-﻿import { apiClient } from "./authApiClient";
+import { apiClient } from "./authApiClient";
 import type { LoginPayload, LoginResponse, RegisterPayload } from "../types/typesAuth";
 import { AUTH_BASE_URL } from "../url/baseUrl";
 
@@ -23,7 +23,7 @@ export const getMe = async () => {
     throw new Error("No authentication token found");
   }
 
-  return apiClient<{ data: { user: { displayName: string } } }>(`${AUTH_BASE_URL}/me`, {
+  return apiClient<{ data: { user: { displayName: string }; workspaceRole: "ADMIN" | "MEMBER" } }>(`${AUTH_BASE_URL}/me`, {
     method: "GET",
   });
 };

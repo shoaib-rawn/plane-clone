@@ -8,6 +8,7 @@ import RegisterPage from "../pages/RegisterPage";
 import Dashboard from "../pages/Dashboard";
 import ProjectsPage from "../pages/ProjectsPage";
 import MembersPage from "../pages/MembersPage";
+import MyTicketsPage from "../pages/MyTicketsPage";
 
 import AppLayout from "../components/AppLayout";
 
@@ -55,6 +56,10 @@ const AppRoutes = () => {
             {
               path: "/members",
               element: <MembersPage />,
+            },
+            {
+              path: "/my-tickets",
+              element: <MyTicketsPage />,
             },
           ],
         },

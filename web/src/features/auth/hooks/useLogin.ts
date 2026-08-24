@@ -14,6 +14,7 @@ export const useLogin = () => {
                 onSuccess: (data) => {
                 const token = data.data.token;
                   const userName = data.data.user.displayName;
+                  const workspaceRole = data.data.workspaceRole;
             
                   localStorage.setItem("token", token);
             
@@ -21,6 +22,7 @@ export const useLogin = () => {
                     login({
                       token,
                       userName,
+                      workspaceRole,
                     }),
                   );
                 },

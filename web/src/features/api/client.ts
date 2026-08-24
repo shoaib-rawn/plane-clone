@@ -1,4 +1,4 @@
-﻿const buildHeaders = (customHeaders: HeadersInit = {}): Headers => {
+const buildHeaders = (customHeaders: HeadersInit = {}): Headers => {
   const headers = new Headers(customHeaders);
 
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
@@ -38,14 +38,16 @@ export const apiClient = async <T = Record<string, unknown>>(
   }
 
   const response = await fetch(url, requestOptions);
-  const data = (await response.json().catch(() => ({}))) as T & {
-    message?: string;
-    error?: string;
-  };
+  const data = (await response.json().catch(() => ({}))) as any;
 
   if (!response.ok) {
-    throw new Error(data.message ?? data.error ?? "Something went wrong");
+    const errorDetails = data.error;
+    const errMsg = (errorDetails && typeof errorDetails === 'object' && errorDetails.message)
+      ? errorDetails.message
+      : data.message ?? data.error ?? "Something went wrong";
+    throw new Error(typeof errMsg === 'string' ? errMsg : JSON.stringify(errMsg));
   }
 
   return data;
 };
+

@@ -15,8 +15,6 @@ export const updateMeController = asyncHandler(async (req: Request, res: Respons
   });
 });
 export const getAllUsersController = asyncHandler(async (req, res) => {
-  const users = await prisma.user.findMany({
-    select: { id: true, email: true, displayName: true } // passwordHash hide rakhein
-  });
+  const users = await userService.getAllUsers();
   return res.json({ data: users });
 });

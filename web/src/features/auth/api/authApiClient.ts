@@ -1,8 +1,3 @@
-﻿type ApiErrorResponse = {
-  message?: string;
-  error?: string;
-};
-
 export const apiClient = async <T = unknown>(
   url: string,
   options: Omit<RequestInit, "body"> & {
@@ -45,10 +40,14 @@ export const apiClient = async <T = unknown>(
   }
 
   const response = await fetch(url, requestOptions);
-  const data = (await response.json().catch(() => ({}))) as T & ApiErrorResponse;
+  const data = (await response.json().catch(() => ({}))) as any;
 
   if (!response.ok) {
-    throw new Error(data.message ?? data.error ?? "Something went wrong");
+    const errorDetails = data.error;
+    const errMsg = (errorDetails && typeof errorDetails === 'object' && errorDetails.message)
+      ? errorDetails.message
+      : data.message ?? data.error ?? "Something went wrong";
+    throw new Error(typeof errMsg === 'string' ? errMsg : JSON.stringify(errMsg));
   }
 
   return data;

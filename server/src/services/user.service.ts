@@ -38,3 +38,11 @@ export async function updateCurrentUser(
 
   return toPublicUser(updatedUser);
 }
+
+export async function getAllUsers(): Promise<PublicUser[]> {
+  const users = await prisma.user.findMany({
+    where: { isActive: true },
+  });
+  return users.map(toPublicUser);
+}
+

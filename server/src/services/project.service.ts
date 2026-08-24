@@ -11,7 +11,7 @@
 import { prisma } from '../lib/prisma.js';
 import { DEFAULT_STATES } from '../lib/defaultStates.js';
 import { CreateProjectInput } from '../schemas/project.schema.js';
-import { ConflictError, NotFoundError } from '../lib/errors.js';
+import { ConflictError, NotFoundError, ForbiddenError } from '../lib/errors.js';
 
 export async function createProject(userId: string, input: CreateProjectInput) {
   // Perform ALL database reads and writes in a single atomic $transaction
@@ -19,11 +19,15 @@ export async function createProject(userId: string, input: CreateProjectInput) {
     // 1. Get workspace membership for user inside transaction
     const workspaceMember = await tx.workspaceMember.findFirst({
       where: { userId },
-      select: { workspaceId: true },
+      select: { workspaceId: true, role: true },
     });
 
     if (!workspaceMember) {
       throw NotFoundError('User does not belong to any workspace');
+    }
+
+    if (workspaceMember.role !== 'ADMIN') {
+      throw ForbiddenError('Only workspace administrators can create projects');
     }
 
     const workspaceId = workspaceMember.workspaceId;
@@ -135,6 +139,9 @@ export async function getProjectsForUser(userId: string) {
     include: {
       members: {
         where: { userId },
+      },
+      states: {
+        orderBy: { position: 'asc' },
       },
     },
     orderBy: { createdAt: 'desc' },

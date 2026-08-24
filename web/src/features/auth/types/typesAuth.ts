@@ -11,6 +11,7 @@ export interface RegisterPayload {
 export interface LoginResponse {
   data: {
     token: string;
+    workspaceRole: "ADMIN" | "MEMBER";
     user: {
       displayName: string;
     };
