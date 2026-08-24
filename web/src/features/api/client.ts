@@ -1,35 +1,28 @@
-﻿type ApiErrorResponse = {
-  message?: string;
-  error?: string;
-};
+﻿const buildHeaders = (customHeaders: HeadersInit = {}): Headers => {
+  const headers = new Headers(customHeaders);
 
-export const apiClient = async <T = unknown>(
-  url: string,
-  options: Omit<RequestInit, "body"> & {
-    body?: BodyInit | object | null;
-  } = {},
-): Promise<T> => {
-  const headers = new Headers(options.headers ?? {});
-
-  const token = localStorage.getItem("token");
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
   if (token) {
     headers.set("Authorization", `Bearer ${token}`);
   }
 
-  if (
-    options.body !== undefined &&
-    options.body !== null &&
-    !(options.body instanceof FormData) &&
-    typeof options.body !== "string" &&
-    !(options.body instanceof URLSearchParams)
-  ) {
+  if (!headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
 
+  return headers;
+};
+
+export const apiClient = async <T = Record<string, unknown>>(
+  url: string,
+  options: Omit<RequestInit, "body"> & {
+    body?: BodyInit | object | null;
+  } = {},
+): Promise<T> => {
   const requestOptions: RequestInit = {
     ...options,
-    headers,
+    headers: buildHeaders(options.headers ?? {}),
   } as RequestInit;
 
   if (
@@ -45,7 +38,10 @@ export const apiClient = async <T = unknown>(
   }
 
   const response = await fetch(url, requestOptions);
-  const data = (await response.json().catch(() => ({}))) as T & ApiErrorResponse;
+  const data = (await response.json().catch(() => ({}))) as T & {
+    message?: string;
+    error?: string;
+  };
 
   if (!response.ok) {
     throw new Error(data.message ?? data.error ?? "Something went wrong");

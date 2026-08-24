@@ -6,6 +6,8 @@ import PrivateRoute from "./PrivateRoute";
 import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
 import Dashboard from "../pages/Dashboard";
+import ProjectsPage from "../pages/ProjectsPage";
+import MembersPage from "../pages/MembersPage";
 
 import AppLayout from "../components/AppLayout";
 
@@ -45,6 +47,14 @@ const AppRoutes = () => {
             {
               path: "/dashboard",
               element: <Dashboard />,
+            },
+            {
+              path: "/projects",
+              element: <ProjectsPage />,
+            },
+            {
+              path: "/members",
+              element: <MembersPage />,
             },
           ],
         },

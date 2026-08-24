@@ -1,4 +1,13 @@
 // server/src/services/project.service.ts
+// ------------------------------------------------------------
+// This service function `createProject` creates a new project and inserts
+// all related data in a single atomic Prisma `$transaction`. This ensures:
+//   • Data consistency (any failure rolls back the whole transaction)
+//   • Uniqueness check for the project key and creation of default issue states
+//   • Assignment of the creator as Project Admin
+//   • Setting the default 'Todo' state as the project's `defaultStateId`
+// All of these steps keep business logic in the service layer (Downwards‑Only architecture).
+// ------------------------------------------------------------
 import { prisma } from '../lib/prisma.js';
 import { DEFAULT_STATES } from '../lib/defaultStates.js';
 import { CreateProjectInput } from '../schemas/project.schema.js';
@@ -95,3 +104,91 @@ export async function createProject(userId: string, input: CreateProjectInput) {
     myRole: 'ADMIN',
   };
 }
+
+export async function getProjectsForUser(userId: string) {
+  // 1. Get workspace membership for user to determine workspace ID and Workspace Role
+  const workspaceMember = await prisma.workspaceMember.findFirst({
+    where: { userId },
+    select: { workspaceId: true, role: true },
+  });
+
+  if (!workspaceMember) {
+    throw NotFoundError('User does not belong to any workspace');
+  }
+
+  const { workspaceId, role: workspaceRole } = workspaceMember;
+
+  // 2. Fetch projects depending on Workspace Role (Workspace ADMIN sees all, MEMBER sees joined only)
+  const projectFilters: any = {
+    workspaceId,
+    deletedAt: null,
+  };
+
+  if (workspaceRole !== 'ADMIN') {
+    projectFilters.members = {
+      some: { userId },
+    };
+  }
+
+  const projects = await prisma.project.findMany({
+    where: projectFilters,
+    include: {
+      members: {
+        where: { userId },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+
+
+  // 3. For each project, determine the role and count issues
+  const result = await Promise.all(
+    projects.map(async (project) => {
+      // Determine user's project role
+      let myRole: string;
+      if (workspaceRole === 'ADMIN') {
+        myRole = 'ADMIN';
+      } else {
+        const membership = project.members[0];
+        myRole = membership ? membership.role : 'VIEWER';
+      }
+
+      // Count open and completed issues
+      const [openIssuesCount, doneIssuesCount] = await Promise.all([
+        prisma.issue.count({
+          where: {
+            projectId: project.id,
+            deletedAt: null,
+            state: {
+              group: {
+                notIn: ['completed', 'cancelled'],
+              },
+            },
+          },
+        }),
+        prisma.issue.count({
+          where: {
+            projectId: project.id,
+            deletedAt: null,
+            state: {
+              group: 'completed',
+            },
+          },
+        }),
+      ]);
+
+      // Remove nested members array from final output for cleaner structure
+      const { members, ...projectData } = project;
+
+      return {
+        ...projectData,
+        myRole,
+        openIssuesCount,
+        doneIssuesCount,
+      };
+    })
+  );
+
+  return result;
+}
+
