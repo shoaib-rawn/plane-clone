@@ -6,6 +6,7 @@ import type { RootState } from "../store/store";
 
 const Navbar = () => {
   const userName = useSelector((state: RootState) => state.auth.userName);
+  const workspaceRole = useSelector((state: RootState) => state.auth.workspaceRole);
 
   return (
     <header className="navbar">
@@ -26,7 +27,7 @@ const Navbar = () => {
         <div className="navbar-user">
           <div>
             {userName.toUpperCase()}
-            <small>Admin</small>
+            <small>{workspaceRole}</small>
           </div>
         </div>
       </div>

@@ -20,10 +20,12 @@ const AuthInitializer = () => {
         const response = await getMe();
 
         const user = response.data.user;
+        const workspaceRole = response.data.workspaceRole;
 
         dispatch(
           setUser({
             userName: user.displayName,
+            workspaceRole: workspaceRole,
           }),
         );
       } catch (error) {

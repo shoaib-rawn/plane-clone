@@ -3,6 +3,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getProjects, createProject } from "../features/projects/api/projectApi";
 import { getProjectTickets } from "../features/tickets/api/ticketApi";
 import CreateTicketModal from "../components/CreateTicketModal";
+import { useSelector } from "react-redux";
+import type { RootState } from "../store/store";
 
 const ProjectTicketsList: React.FC<{ projectId: string }> = ({ projectId }) => {
   const { data, isLoading } = useQuery<any>({
@@ -43,6 +45,8 @@ const ProjectTicketsList: React.FC<{ projectId: string }> = ({ projectId }) => {
 const ProjectsPage: React.FC = () => {
   const queryClient = useQueryClient();
   const { data, isLoading, isError } = useQuery<any>({ queryKey: ["projects"], queryFn: () => getProjects() });
+
+  const workspaceRole = useSelector((state: RootState) => state.auth.workspaceRole);
 
   const [name, setName] = useState("");
   const [key, setKey] = useState("");
@@ -91,49 +95,51 @@ const ProjectsPage: React.FC = () => {
     <div style={{ padding: "24px" }}>
       <h1 style={{ margin: "0 0 20px 0", fontSize: 24, fontWeight: 600 }}>Projects</h1>
 
-      <section style={{ marginBottom: 32, backgroundColor: "#fff", padding: 20, borderRadius: 8, border: "1px solid #E5E7EB" }}>
-        <h2 style={{ marginTop: 0, marginBottom: 16, fontSize: 16, fontWeight: 600 }}>Create project</h2>
-        <form onSubmit={handleCreate} style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 480 }}>
-          <input
-            placeholder="Project Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            style={{ padding: "8px 12px", border: "1px solid #D1D5DB", borderRadius: 6, fontSize: 14 }}
-          />
-          <input
-            placeholder="Project Key (e.g. WEB)"
-            value={key}
-            onChange={(e) => setKey(e.target.value)}
-            style={{ padding: "8px 12px", border: "1px solid #D1D5DB", borderRadius: 6, fontSize: 14 }}
-          />
-          <input
-            placeholder="Description (optional)"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            style={{ padding: "8px 12px", border: "1px solid #D1D5DB", borderRadius: 6, fontSize: 14 }}
-          />
+      {workspaceRole === "ADMIN" && (
+        <section style={{ marginBottom: 32, backgroundColor: "#fff", padding: 20, borderRadius: 8, border: "1px solid #E5E7EB" }}>
+          <h2 style={{ marginTop: 0, marginBottom: 16, fontSize: 16, fontWeight: 600 }}>Create project</h2>
+          <form onSubmit={handleCreate} style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 480 }}>
+            <input
+              placeholder="Project Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              style={{ padding: "8px 12px", border: "1px solid #D1D5DB", borderRadius: 6, fontSize: 14 }}
+            />
+            <input
+              placeholder="Project Key (e.g. WEB)"
+              value={key}
+              onChange={(e) => setKey(e.target.value)}
+              style={{ padding: "8px 12px", border: "1px solid #D1D5DB", borderRadius: 6, fontSize: 14 }}
+            />
+            <input
+              placeholder="Description (optional)"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              style={{ padding: "8px 12px", border: "1px solid #D1D5DB", borderRadius: 6, fontSize: 14 }}
+            />
 
-          {error && <div style={{ color: "#DC2626", fontSize: 13 }}>{error}</div>}
+            {error && <div style={{ color: "#DC2626", fontSize: 13 }}>{error}</div>}
 
-          <button
-            type="submit"
-            disabled={createMutation.isPending}
-            style={{
-              padding: "8px 16px",
-              backgroundColor: "#2563EB",
-              color: "#fff",
-              border: "none",
-              borderRadius: 6,
-              cursor: "pointer",
-              fontSize: 14,
-              fontWeight: 500,
-              alignSelf: "flex-start"
-            }}
-          >
-            {createMutation.isPending ? "Creating..." : "Create Project"}
-          </button>
-        </form>
-      </section>
+            <button
+              type="submit"
+              disabled={createMutation.isPending}
+              style={{
+                padding: "8px 16px",
+                backgroundColor: "#2563EB",
+                color: "#fff",
+                border: "none",
+                borderRadius: 6,
+                cursor: "pointer",
+                fontSize: 14,
+                fontWeight: 500,
+                alignSelf: "flex-start"
+              }}
+            >
+              {createMutation.isPending ? "Creating..." : "Create Project"}
+            </button>
+          </form>
+        </section>
+      )}
 
       <section style={{ backgroundColor: "#fff", padding: 20, borderRadius: 8, border: "1px solid #E5E7EB" }}>
         <h2 style={{ marginTop: 0, marginBottom: 16, fontSize: 16, fontWeight: 600 }}>Your projects</h2>
