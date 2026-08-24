@@ -136,6 +136,9 @@ export async function getProjectsForUser(userId: string) {
       members: {
         where: { userId },
       },
+      states: {
+        orderBy: { position: 'asc' },
+      },
     },
     orderBy: { createdAt: 'desc' },
   });

@@ -19,7 +19,7 @@ export const projectMemberRouter = Router({ mergeParams: true });
 projectMemberRouter.get(
   '/',
   requireAuth,
-  requireProjectRole(ProjectRole.MEMBER),
+  requireProjectRole(ProjectRole.VIEWER),
   getProjectMembersController,
 );
 

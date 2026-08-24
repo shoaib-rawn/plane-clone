@@ -144,3 +144,107 @@ export async function createIssue(params: CreateIssueParams) {
     };
   });
 }
+
+export async function getProjectIssues(projectId: string, groupBy?: string) {
+  const project = await prisma.project.findFirst({
+    where: { id: projectId, deletedAt: null },
+    select: { key: true }
+  });
+  if (!project) {
+    throw NotFoundError('Project not found');
+  }
+
+  const issues = await prisma.issue.findMany({
+    where: {
+      projectId,
+      deletedAt: null,
+    },
+    include: {
+      assignee: {
+        select: {
+          id: true,
+          email: true,
+          displayName: true,
+          avatarUrl: true,
+        },
+      },
+      createdBy: {
+        select: {
+          id: true,
+          email: true,
+          displayName: true,
+          avatarUrl: true,
+        },
+      },
+      state: true,
+    },
+    orderBy: {
+      sequenceId: 'desc',
+    },
+  });
+
+  const formattedIssues = issues.map((issue) => ({
+    ...issue,
+    key: `${project.key}-${issue.sequenceId}`,
+  }));
+
+  if (groupBy === 'state') {
+    const grouped: Record<string, typeof formattedIssues> = {};
+    for (const issue of formattedIssues) {
+      const stateName = issue.state.name;
+      if (!grouped[stateName]) {
+        grouped[stateName] = [];
+      }
+      grouped[stateName].push(issue);
+    }
+    return grouped;
+  }
+
+  return formattedIssues;
+}
+
+export async function getMyIssues(userId: string) {
+  const issues = await prisma.issue.findMany({
+    where: {
+      assigneeId: userId,
+      deletedAt: null,
+      project: {
+        deletedAt: null,
+      },
+    },
+    include: {
+      assignee: {
+        select: {
+          id: true,
+          email: true,
+          displayName: true,
+          avatarUrl: true,
+        },
+      },
+      createdBy: {
+        select: {
+          id: true,
+          email: true,
+          displayName: true,
+          avatarUrl: true,
+        },
+      },
+      state: true,
+      project: {
+        select: {
+          key: true,
+          name: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+
+  return issues.map((issue) => ({
+    ...issue,
+    key: `${issue.project.key}-${issue.sequenceId}`,
+  }));
+}
+
