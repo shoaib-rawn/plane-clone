@@ -5,7 +5,7 @@ import { toPublicUser, PublicUser } from '../lib/user.js';
 import { hashPassword, verifyPassword, generateToken } from '../lib/auth.js';
 import { RegisterInput, LoginInput } from '../schemas/auth.schema.js';
 
-export async function registerUser(input: RegisterInput): Promise<{ user: PublicUser; token: string }> {
+export async function registerUser(input: RegisterInput): Promise<{ user: PublicUser; workspaceRole: string; token: string }> {
   const passwordHash = await hashPassword(input.password);
 
   const user = await prisma.$transaction(async (tx) => {
@@ -50,11 +50,12 @@ export async function registerUser(input: RegisterInput): Promise<{ user: Public
 
   return {
     user: toPublicUser(user),
+    workspaceRole: 'MEMBER' as const,
     token,
   };
 }
 
-export async function loginUser(input: LoginInput): Promise<{ user: PublicUser; token: string }> {
+export async function loginUser(input: LoginInput): Promise<{ user: PublicUser; workspaceRole: string; token: string }> {
   const user = await prisma.user.findUnique({
     where: { email: input.email },
   });
@@ -67,8 +68,14 @@ export async function loginUser(input: LoginInput): Promise<{ user: PublicUser; 
 
   const token = generateToken(user.id);
 
+  const workspaceMember = await prisma.workspaceMember.findFirst({
+    where: { userId: user.id },
+    select: { role: true },
+  });
+
   return {
     user: toPublicUser(user),
+    workspaceRole: workspaceMember?.role || 'MEMBER',
     token,
   };
 }
