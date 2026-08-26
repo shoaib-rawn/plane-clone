@@ -1,6 +1,7 @@
-// server/src/app.ts
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 import { config } from './config/env.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { prisma } from './lib/prisma.js';
@@ -8,6 +9,10 @@ import { apiRouter } from './routes/index.js';
 
 export const app = express();
 
+// Security HTTP headers
+app.use(helmet());
+
+// Cross-Origin Resource Sharing with credentials
 app.use(
   cors({
     origin: config.cors.origin,
@@ -15,6 +20,7 @@ app.use(
   })
 );
 
+app.use(cookieParser());
 app.use(express.json());
 
 // Public health check endpoint (verifies database connection per Day 5 spec)

@@ -9,8 +9,15 @@
 // AsyncHandler se errors automatically next middleware (global error handler) ko forward hote hain.
 // ------------------------------------------------------------
 import { Request, Response } from 'express';
-import { createProjectSchema } from '../schemas/project.schema.js';
-import { createProject, getProjectsForUser } from '../services/project.service.js';
+import { createProjectSchema, updateProjectSchema } from '../schemas/project.schema.js';
+import {
+  createProject,
+  getProjectsForUser,
+  updateProject,
+  archiveProject,
+  unarchiveProject,
+  deleteProject,
+} from '../services/project.service.js';
 import { asyncHandler } from '../lib/asyncHandler.js';
 
 export const createProjectController = asyncHandler(async (req: Request, res: Response) => {
@@ -32,4 +39,43 @@ export const getProjectsController = asyncHandler(async (req: Request, res: Resp
     data: result,
   });
 });
+
+export const updateProjectController = asyncHandler(async (req: Request, res: Response) => {
+  const { projectId } = req.params;
+  const validatedBody = updateProjectSchema.parse(req.body);
+
+  const result = await updateProject(projectId, validatedBody);
+
+  return res.status(200).json({
+    data: result,
+  });
+});
+
+export const archiveProjectController = asyncHandler(async (req: Request, res: Response) => {
+  const { projectId } = req.params;
+  const result = await archiveProject(projectId);
+
+  return res.status(200).json({
+    data: result,
+  });
+});
+
+export const unarchiveProjectController = asyncHandler(async (req: Request, res: Response) => {
+  const { projectId } = req.params;
+  const result = await unarchiveProject(projectId);
+
+  return res.status(200).json({
+    data: result,
+  });
+});
+
+export const deleteProjectController = asyncHandler(async (req: Request, res: Response) => {
+  const { projectId } = req.params;
+  const result = await deleteProject(projectId);
+
+  return res.status(200).json({
+    data: result,
+  });
+});
+
 

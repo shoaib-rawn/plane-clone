@@ -25,3 +25,24 @@ export function generateToken(userId: string): string {
     expiresIn: config.jwt.expiresIn as jwt.SignOptions['expiresIn'],
   });
 }
+
+/**
+ * Generates a signed JWT token specifically for password resets (expires in 1h).
+ */
+export function generateResetToken(userId: string): string {
+  return jwt.sign({ userId, type: 'reset_password' }, config.jwt.secret, {
+    expiresIn: '1h',
+  });
+}
+
+/**
+ * Verifies a password reset token and extracts the userId.
+ */
+export function verifyResetToken(token: string): { userId: string } {
+  const decoded = jwt.verify(token, config.jwt.secret) as { userId: string; type?: string };
+  if (decoded.type !== 'reset_password') {
+    throw new Error('Invalid reset token type');
+  }
+  return { userId: decoded.userId };
+}
+

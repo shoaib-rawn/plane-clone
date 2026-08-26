@@ -250,4 +250,55 @@ describe('Issue (Ticket) Creation Integration Tests', () => {
     const uniqueSeqIds = new Set(seqIds);
     expect(uniqueSeqIds.size).toBe(5);
   });
+
+  // Day 15: List Issues Tests
+  it('should list all project issues in a flat array (Day 15)', async () => {
+    const res = await request(app)
+      .get(`/api/v1/projects/${projectId}/issues`)
+      .set('Authorization', `Bearer ${projMemberToken}`);
+
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body.data)).toBe(true);
+    expect(res.body.data.length).toBeGreaterThanOrEqual(7);
+
+    const firstIssue = res.body.data[0];
+    expect(firstIssue.key).toBeDefined();
+    expect(firstIssue.key).toMatch(/^TEST-\d+$/);
+    expect(firstIssue.state).toBeDefined();
+    expect(firstIssue.createdBy).toBeDefined();
+    expect(firstIssue.createdBy.passwordHash).toBeUndefined(); // Security: no password leak
+  });
+
+  it('should group project issues by state when groupBy=state query param is provided (Day 15)', async () => {
+    const res = await request(app)
+      .get(`/api/v1/projects/${projectId}/issues?groupBy=state`)
+      .set('Authorization', `Bearer ${projMemberToken}`);
+
+    expect(res.status).toBe(200);
+    expect(typeof res.body.data).toBe('object');
+    expect(Array.isArray(res.body.data)).toBe(false);
+
+    // Should have keys for states that contain issues (e.g. 'Todo', 'In Progress')
+    expect(res.body.data['Todo']).toBeDefined();
+    expect(Array.isArray(res.body.data['Todo'])).toBe(true);
+    expect(res.body.data['Todo'].length).toBeGreaterThan(0);
+    expect(res.body.data['Todo'][0].key).toBeDefined();
+  });
+
+  it('should allow project VIEWERS to list issues (Day 15)', async () => {
+    const res = await request(app)
+      .get(`/api/v1/projects/${projectId}/issues`)
+      .set('Authorization', `Bearer ${projViewerToken}`);
+
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body.data)).toBe(true);
+  });
+
+  it('should return 404 for unassociated users when listing issues (Day 15 / Chapter 5.4)', async () => {
+    const res = await request(app)
+      .get(`/api/v1/projects/${projectId}/issues`)
+      .set('Authorization', `Bearer ${nonMemberToken}`);
+
+    expect(res.status).toBe(404);
+  });
 });
