@@ -98,37 +98,37 @@ const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ projectId, projec
           <X size={20} />
         </button>
 
-        <h2 style={{ marginTop: 0, marginBottom: 20, fontSize: 18, fontWeight: 600 }}>Create Ticket</h2>
+        <h2 style={{ marginTop: 0, marginBottom: 20, fontSize: 18, fontWeight: 600, color: "#334155" }}>Create Ticket</h2>
 
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            <label style={{ fontSize: 13, fontWeight: 500, color: "#374151" }}>Title *</label>
+            <label style={{ fontSize: 13, fontWeight: 500, color: "#334155" }}>Title *</label>
             <input
               placeholder="e.g. Fix mobile safari layout"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              style={{ padding: "8px 12px", border: "1px solid #D1D5DB", borderRadius: 6, fontSize: 14 }}
+              style={{ padding: "8px 12px", border: "1px solid #CBD5E1", borderRadius: 6, fontSize: 14 }}
             />
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            <label style={{ fontSize: 13, fontWeight: 500, color: "#374151" }}>Description</label>
+            <label style={{ fontSize: 13, fontWeight: 500, color: "#334155" }}>Description</label>
             <textarea
               placeholder="Describe the issue..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              style={{ padding: "8px 12px", border: "1px solid #D1D5DB", borderRadius: 6, fontSize: 14, fontFamily: "inherit", resize: "vertical" }}
+              style={{ padding: "8px 12px", border: "1px solid #CBD5E1", borderRadius: 6, fontSize: 14, fontFamily: "inherit", resize: "vertical" }}
             />
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-              <label style={{ fontSize: 13, fontWeight: 500, color: "#374151" }}>State</label>
+              <label style={{ fontSize: 13, fontWeight: 500, color: "#334155" }}>State</label>
               <select
                 value={stateId}
                 onChange={(e) => setStateId(e.target.value)}
-                style={{ padding: "8px 12px", border: "1px solid #D1D5DB", borderRadius: 6, fontSize: 14 }}
+                style={{ padding: "8px 12px", border: "1px solid #CBD5E1", borderRadius: 6, fontSize: 14 }}
               >
                 {projectStates.map((s) => (
                   <option key={s.id} value={s.id}>{s.name}</option>
@@ -137,11 +137,11 @@ const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ projectId, projec
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-              <label style={{ fontSize: 13, fontWeight: 500, color: "#374151" }}>Priority</label>
+              <label style={{ fontSize: 13, fontWeight: 500, color: "#334155" }}>Priority</label>
               <select
                 value={priority}
                 onChange={(e) => setPriority(e.target.value as any)}
-                style={{ padding: "8px 12px", border: "1px solid #D1D5DB", borderRadius: 6, fontSize: 14 }}
+                style={{ padding: "8px 12px", border: "1px solid #CBD5E1", borderRadius: 6, fontSize: 14 }}
               >
                 <option value="NONE">NONE</option>
                 <option value="LOW">LOW</option>
@@ -154,11 +154,11 @@ const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ projectId, projec
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-              <label style={{ fontSize: 13, fontWeight: 500, color: "#374151" }}>Assignee</label>
+              <label style={{ fontSize: 13, fontWeight: 500, color: "#334155" }}>Assignee</label>
               <select
                 value={assigneeId}
                 onChange={(e) => setAssigneeId(e.target.value)}
-                style={{ padding: "8px 12px", border: "1px solid #D1D5DB", borderRadius: 6, fontSize: 14 }}
+                style={{ padding: "8px 12px", border: "1px solid #CBD5E1", borderRadius: 6, fontSize: 14 }}
               >
                 <option value="">-- Unassigned --</option>
                 {members.map((m: any) => (
@@ -170,12 +170,12 @@ const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ projectId, projec
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-              <label style={{ fontSize: 13, fontWeight: 500, color: "#374151" }}>Due Date</label>
+              <label style={{ fontSize: 13, fontWeight: 500, color: "#334155" }}>Due Date</label>
               <input
                 type="date"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
-                style={{ padding: "8px 12px", border: "1px solid #D1D5DB", borderRadius: 6, fontSize: 14 }}
+                style={{ padding: "8px 12px", border: "1px solid #CBD5E1", borderRadius: 6, fontSize: 14 }}
               />
             </div>
           </div>
@@ -201,16 +201,18 @@ const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ projectId, projec
               type="submit"
               disabled={createMutation.isPending}
               style={{
-                padding: "8px 16px",
+                padding: "9px 18px",
                 border: "none",
-                borderRadius: 6,
-                backgroundColor: "#2563EB",
+                borderRadius: 7,
+                background: "linear-gradient(135deg, #008be3 0%, #30AFFF 100%)",
                 color: "#fff",
                 cursor: "pointer",
                 fontSize: 14,
+                fontWeight: 600,
                 display: "flex",
                 alignItems: "center",
-                gap: 6
+                gap: 6,
+                boxShadow: "0 4px 10px rgba(48, 175, 255, 0.25)",
               }}
             >
               {createMutation.isPending && <LoaderCircle size={16} className="spinner" />}

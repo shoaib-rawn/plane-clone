@@ -1,0 +1,116 @@
+@import "@fontsource/cal-sans";
+@import "@fontsource/dm-sans";
+@import "@fontsource/dm-sans/400.css";
+@import "@fontsource/dm-sans/500.css";
+@import "@fontsource/dm-sans/600.css";
+@import "@fontsource/dm-sans/700.css";
+
+:root {
+  /* Main Color Palette: #92EEFF and #30AFFF */
+  --primary: #30AFFF;
+  --primary-hover: #0ca0fc;
+  --primary-dark: #0084d6;
+  --primary-light: #e6f7ff;
+  --primary-border: #bae6fd;
+  
+  --accent-cyan: #92EEFF;
+  --accent-cyan-hover: #75e8fc;
+  --accent-cyan-light: #f0fbff;
+  --accent-cyan-border: #a5f1ff;
+
+  --gradient-primary: linear-gradient(135deg, #30AFFF 0%, #008de0 100%);
+  --gradient-cyan: linear-gradient(135deg, #92EEFF 0%, #30AFFF 100%);
+  --gradient-dark: linear-gradient(180deg, #081627 0%, #0c2642 45%, #0f365c 100%);
+
+  /* Softer, non-harsh light-black & slate tones */
+  --text-heading: #334155;   /* Smooth soft slate heading */
+  --text-main: #475569;      /* Gentle body text */
+  --text-secondary: #64748b; /* Soft subtitle */
+  --text-muted: #94a3b8;     /* Muted/subtle text */
+
+  --font-heading: 'Cal Sans', 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Base Typography & Global Elements */
+html,
+body,
+#root,
+p,
+span,
+a,
+label,
+input,
+button,
+textarea,
+select,
+div {
+  font-family: var(--font-body);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  color: var(--text-main);
+  background-color: #f8fafc;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Global Headings Implementation with Cal Sans - Soft Light Black */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.cal-sans,
+.brand h1,
+.signin-heading h2,
+.section-header h3,
+.project-row-header h4,
+.navbar-left h3,
+.project-settings-header h3,
+.header-title-box h3,
+.ticket-title-display h2,
+.danger-title,
+.properties-title,
+.stat-value {
+  font-family: 'Cal Sans', var(--font-heading) !important;
+  color: var(--text-heading) !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.015em;
+}
+
+/* Dashboard banner heading remains bright on dark background */
+.dashboard-header h1 {
+  font-family: 'Cal Sans', var(--font-heading) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.01em;
+}
+
+.sidebar-logo h2 {
+  font-family: 'Cal Sans', var(--font-heading) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.01em;
+}
+
+/* Custom Scrollbars in primary cyan/blue theme */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #30AFFF, #92EEFF);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #30AFFF;
+}

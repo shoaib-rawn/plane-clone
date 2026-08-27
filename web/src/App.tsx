@@ -1,14 +1,7 @@
-import AuthInitializer from "./components/AuthInitializer.tsx";
-
-import AppRoutes from "./routes/AppRoutes.tsx";
+import AppRoutes from "./routes/AppRoutes";
 
 function App() {
-  return (
-    <>
-      <AppRoutes />
-      <AuthInitializer />
-    </>
-  );
+  return <AppRoutes />;
 }
 
 export default App;

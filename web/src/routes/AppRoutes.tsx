@@ -5,10 +5,13 @@ import PrivateRoute from "./PrivateRoute";
 
 import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
+import ForgotPasswordPage from "../pages/ForgotPasswordPage";
+import ResetPasswordPage from "../pages/ResetPasswordPage";
 import Dashboard from "../pages/Dashboard";
 import ProjectsPage from "../pages/ProjectsPage";
 import MembersPage from "../pages/MembersPage";
 import MyTicketsPage from "../pages/MyTicketsPage";
+import ProfilePage from "../pages/ProfilePage";
 
 import AppLayout from "../components/AppLayout";
 
@@ -38,6 +41,24 @@ const AppRoutes = () => {
       ),
     },
 
+    {
+      path: "/forgot-password",
+      element: (
+        <PublicRoute>
+          <ForgotPasswordPage />
+        </PublicRoute>
+      ),
+    },
+
+    {
+      path: "/reset-password",
+      element: (
+        <PublicRoute>
+          <ResetPasswordPage />
+        </PublicRoute>
+      ),
+    },
+
     // Private Routes
     {
       element: <PrivateRoute />,
@@ -60,6 +81,14 @@ const AppRoutes = () => {
             {
               path: "/my-tickets",
               element: <MyTicketsPage />,
+            },
+            {
+              path: "/settings",
+              element: <ProfilePage />,
+            },
+            {
+              path: "/profile",
+              element: <ProfilePage />,
             },
           ],
         },

@@ -6,17 +6,19 @@
 
   padding: 0 24px;
 
-  background: linear-gradient(90deg, #ffffff 0%, #f8fbff 100%);
+  background: linear-gradient(90deg, #ffffff 0%, #f4fbff 100%);
 
-  border-bottom: 1px solid #dbeafe;
+  border-bottom: 1px solid #e0f2fe;
 
   box-shadow:
-    0 2px 12px rgba(15, 23, 42, 0.05),
-    0 1px 3px rgba(37, 99, 235, 0.04);
+    0 2px 12px rgba(15, 23, 42, 0.04),
+    0 1px 3px rgba(48, 175, 255, 0.06);
 
   box-sizing: border-box;
 
   font-family:
+    var(--font-body),
+    "DM Sans",
     Inter,
     -apple-system,
     BlinkMacSystemFont,
@@ -40,7 +42,7 @@
   width: 100%;
   height: 2px;
 
-  background: linear-gradient(90deg, #1d4ed8, #2563eb, #3b82f6, #60a5fa);
+  background: linear-gradient(90deg, #30AFFF, #92EEFF, #30AFFF, #7dd3fc);
 }
 
 .navbar-left {
@@ -58,7 +60,7 @@
 
   letter-spacing: -0.4px;
 
-  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #2563eb 100%);
+  background: linear-gradient(135deg, #071526 0%, #0c243f 45%, #30AFFF 100%);
 
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -88,7 +90,7 @@
 
   background: #f8fafc;
 
-  border: 1px solid #dbe4f0;
+  border: 1.5px solid #e0f2fe;
 
   border-radius: 10px;
 
@@ -107,9 +109,9 @@
 .navbar-search:hover {
   background: #ffffff;
 
-  border-color: #93c5fd;
+  border-color: #92EEFF;
 
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.06);
+  box-shadow: 0 4px 12px rgba(48, 175, 255, 0.1);
 
   transform: translateY(-1px);
 }
@@ -117,11 +119,11 @@
 .navbar-search:focus-within {
   background: #ffffff;
 
-  border-color: #2563eb;
+  border-color: #30AFFF;
 
   box-shadow:
-    0 0 0 4px rgba(37, 99, 235, 0.1),
-    0 5px 15px rgba(37, 99, 235, 0.06);
+    0 0 0 4px rgba(48, 175, 255, 0.15),
+    0 5px 15px rgba(48, 175, 255, 0.08);
 
   transform: translateY(-1px);
 }
@@ -140,7 +142,7 @@
 }
 
 .navbar-search:focus-within svg {
-  color: #2563eb;
+  color: #30AFFF;
 
   transform: scale(1.05);
 }
@@ -153,7 +155,7 @@
 
   background: transparent;
 
-  color: #0f172a;
+  color: #1e293b;
 
   font-size: 14px;
   font-weight: 500;
@@ -201,13 +203,13 @@
 }
 
 .navbar-icon:hover {
-  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  background: linear-gradient(135deg, #f0faff, #e0f6ff);
 
-  color: #2563eb;
+  color: #30AFFF;
 
-  border-color: #bfdbfe;
+  border-color: #92EEFF;
 
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
+  box-shadow: 0 4px 12px rgba(48, 175, 255, 0.15);
 
   transform: translateY(-1px);
 }
@@ -237,14 +239,12 @@
 
   padding-left: 14px;
 
-  border-left: 1px solid #dbe4f0;
+  border-left: 1px solid #e0f2fe;
 
   transition: border-color 0.25s ease;
 }
 
-.navbar-user::before {
-  content: "U";
-
+.navbar-avatar {
   width: 36px;
   height: 36px;
 
@@ -254,61 +254,66 @@
 
   border-radius: 50%;
 
-  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #60a5fa 100%);
+  background: linear-gradient(135deg, #008be3 0%, #30AFFF 60%, #92EEFF 100%);
 
   color: #ffffff;
 
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 800;
 
   box-shadow:
-    0 5px 14px rgba(37, 99, 235, 0.25),
-    inset 0 1px 1px rgba(255, 255, 255, 0.25);
+    0 4px 12px rgba(48, 175, 255, 0.3),
+    inset 0 1px 1px rgba(255, 255, 255, 0.4);
 
   transition:
     transform 0.25s ease,
     box-shadow 0.25s ease;
+  
+  flex-shrink: 0;
 }
 
-.navbar-user:hover::before {
+.navbar-user:hover .navbar-avatar {
   transform: scale(1.06);
 
   box-shadow:
-    0 7px 18px rgba(37, 99, 235, 0.32),
-    inset 0 1px 1px rgba(255, 255, 255, 0.3);
+    0 6px 16px rgba(48, 175, 255, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.5);
 }
 
-.navbar-user div {
+.navbar-user-info {
   display: flex;
   flex-direction: column;
-
   gap: 2px;
-
-  color: #0f172a;
 }
 
-.navbar-user span {
-  font-size: 14px;
+.navbar-user-name {
+  font-size: 13px;
   font-weight: 700;
-
-  color: #0f172a;
-
+  color: #1e293b;
   line-height: 1.2;
-
   transition: color 0.2s ease;
 }
 
-.navbar-user:hover span {
-  color: #2563eb;
+.navbar-user:hover .navbar-user-name {
+  color: #30AFFF;
 }
 
-.navbar-user small {
+.navbar-user-role {
   color: #64748b;
-
   font-size: 11px;
-  font-weight: 500;
-
+  font-weight: 600;
   line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.navbar-user-role.role-admin {
+  color: #30AFFF;
+  font-weight: 700;
+}
+
+.navbar-user-role.role-member {
+  color: #64748b;
 }
 
 @media (max-width: 900px) {

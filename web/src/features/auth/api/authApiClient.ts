@@ -1,3 +1,8 @@
+/**
+ * Standardized HTTP API Client
+ * Configured with credentials: "include" for secure httpOnly Cookie authentication
+ */
+
 export const apiClient = async <T = unknown>(
   url: string,
   options: Omit<RequestInit, "body"> & {
@@ -6,12 +11,7 @@ export const apiClient = async <T = unknown>(
 ): Promise<T> => {
   const headers = new Headers(options.headers ?? {});
 
-  const token = localStorage.getItem("token");
-
-  if (token) {
-    headers.set("Authorization", `Bearer ${token}`);
-  }
-
+  // Set Content-Type header if sending JSON object
   if (
     options.body !== undefined &&
     options.body !== null &&
@@ -22,32 +22,38 @@ export const apiClient = async <T = unknown>(
     headers.set("Content-Type", "application/json");
   }
 
-  const requestOptions: RequestInit = {
-    ...options,
-    headers,
-  } as RequestInit;
+  const { body, headers: _customHeaders, credentials, ...restOptions } = options;
 
+  let serializedBody: BodyInit | null | undefined = undefined;
   if (
-    options.body !== undefined &&
-    options.body !== null &&
-    typeof options.body === "object" &&
-    !(options.body instanceof FormData) &&
-    !(options.body instanceof URLSearchParams)
+    body !== undefined &&
+    body !== null &&
+    typeof body === "object" &&
+    !(body instanceof FormData) &&
+    !(body instanceof URLSearchParams)
   ) {
-    requestOptions.body = JSON.stringify(options.body);
+    serializedBody = JSON.stringify(body);
   } else {
-    requestOptions.body = options.body as BodyInit | null | undefined;
+    serializedBody = body as BodyInit | null | undefined;
   }
+
+  const requestOptions: RequestInit = {
+    ...restOptions,
+    headers,
+    body: serializedBody,
+    // Automatically send and receive secure httpOnly session cookies with each request
+    credentials: credentials ?? "include",
+  };
 
   const response = await fetch(url, requestOptions);
   const data = (await response.json().catch(() => ({}))) as any;
 
   if (!response.ok) {
     const errorDetails = data.error;
-    const errMsg = (errorDetails && typeof errorDetails === 'object' && errorDetails.message)
+    const errMsg = (errorDetails && typeof errorDetails === "object" && errorDetails.message)
       ? errorDetails.message
       : data.message ?? data.error ?? "Something went wrong";
-    throw new Error(typeof errMsg === 'string' ? errMsg : JSON.stringify(errMsg));
+    throw new Error(typeof errMsg === "string" ? errMsg : JSON.stringify(errMsg));
   }
 
   return data;

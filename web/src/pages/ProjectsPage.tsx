@@ -1,71 +1,155 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getProjects, createProject } from "../features/projects/api/projectApi";
-import { getProjectTickets } from "../features/tickets/api/ticketApi";
+import {
+  getProjects,
+  createProject,
+  type ProjectItem,
+} from "../features/projects/api/projectApi";
+import { getProjectTickets, type TicketDetails } from "../features/tickets/api/ticketApi";
 import CreateTicketModal from "../components/CreateTicketModal";
-import { useSelector } from "react-redux";
-import type { RootState } from "../store/store";
+import TicketDetailModal from "../components/TicketDetailModal";
+import ProjectSettingsModal from "../components/ProjectSettingsModal";
+import { useAuth } from "../context/AuthContext";
+import {
+  Layers,
+  Plus,
+  Settings,
+  ChevronDown,
+  ChevronUp,
+  Ticket,
+  Shield,
+  Archive,
+} from "lucide-react";
 
-const ProjectTicketsList: React.FC<{ projectId: string }> = ({ projectId }) => {
+interface ProjectTicketsListProps {
+  projectId: string;
+  onSelectTicket: (ticketId: string) => void;
+}
+
+const ProjectTicketsList: React.FC<ProjectTicketsListProps> = ({
+  projectId,
+  onSelectTicket,
+}) => {
   const { data, isLoading } = useQuery<any>({
     queryKey: ["projectTickets", projectId],
     queryFn: () => getProjectTickets(projectId),
     enabled: !!projectId,
   });
 
-  const tickets = data?.data ?? [];
+  const tickets: TicketDetails[] = data?.data ?? [];
 
-  if (isLoading) return <div style={{ fontSize: 13, color: "#666", padding: "4px 12px" }}>Loading tickets...</div>;
-  if (tickets.length === 0) return <div style={{ fontSize: 13, color: "#666", padding: "4px 12px" }}>No tickets found.</div>;
+  if (isLoading) {
+    return (
+      <div style={{ fontSize: 13, color: "#64748B", padding: "12px 16px" }}>
+        Loading project tickets...
+      </div>
+    );
+  }
+
+  if (tickets.length === 0) {
+    return (
+      <div style={{ fontSize: 13, color: "#94A3B8", padding: "12px 16px", fontStyle: "italic" }}>
+        No tickets created in this project yet.
+      </div>
+    );
+  }
 
   return (
-    <div style={{ margin: "8px 0 16px 20px", borderLeft: "2px solid #E5E7EB", paddingLeft: "12px" }}>
-      <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: 600, color: "#374151" }}>Project Tickets:</h4>
-      <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 6 }}>
-        {tickets.map((t: any) => (
-          <li key={t.id} style={{ display: "flex", gap: 8, fontSize: 13, color: "#4B5563" }}>
-            <span style={{ fontWeight: 600, color: "#111827" }}>{t.key}</span>
-            <span>-</span>
-            <span>{t.title}</span>
-            <span style={{
-              fontSize: 10,
-              padding: "2px 6px",
-              borderRadius: 10,
-              backgroundColor: t.state?.colour ? `${t.state.colour}22` : "#F3F4F6",
-              color: t.state?.colour ?? "#4B5563",
-              fontWeight: 500
-            }}>{t.state?.name}</span>
-          </li>
+    <div style={{ margin: "12px 0 0 0", borderTop: "1px solid #F1F5F9", paddingTop: 12 }}>
+      <h4 style={{ margin: "0 0 10px 0", fontSize: 12, fontWeight: 600, color: "#64748B", textTransform: "uppercase" }}>
+        Tickets ({tickets.length})
+      </h4>
+      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        {tickets.map((t) => (
+          <div
+            key={t.id}
+            onClick={() => onSelectTicket(t.id)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "8px 12px",
+              borderRadius: 6,
+              backgroundColor: "#F8FAFC",
+              cursor: "pointer",
+              transition: "background-color 0.15s",
+              border: "1px solid #E2E8F0",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#EEF2F6")}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#F8FAFC")}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={{ fontWeight: 700, color: "#0284C7", backgroundColor: "#E0F6FF", padding: "2px 6px", borderRadius: 4, fontSize: 12 }}>{t.key}</span>
+              <span style={{ fontSize: 13, color: "#1E293B", fontWeight: 500 }}>{t.title}</span>
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              {t.state && (
+                <span
+                  style={{
+                    fontSize: 11,
+                    padding: "2px 8px",
+                    borderRadius: 10,
+                    backgroundColor: t.state.colour ? `${t.state.colour}15` : "#E2E8F0",
+                    color: t.state.colour ?? "#475569",
+                    fontWeight: 500,
+                    border: `1px solid ${t.state.colour ? `${t.state.colour}30` : "#CBD5E1"}`,
+                  }}
+                >
+                  {t.state.name}
+                </span>
+              )}
+              <span
+                style={{
+                  fontSize: 10,
+                  padding: "2px 6px",
+                  borderRadius: 4,
+                  fontWeight: 600,
+                  backgroundColor: "#F1F5F9",
+                  color: "#475569",
+                }}
+              >
+                {t.priority}
+              </span>
+            </div>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 };
 
 const ProjectsPage: React.FC = () => {
   const queryClient = useQueryClient();
-  const { data, isLoading, isError } = useQuery<any>({ queryKey: ["projects"], queryFn: () => getProjects() });
+  const { data, isLoading, isError } = useQuery<{ data: ProjectItem[] }>({
+    queryKey: ["projects"],
+    queryFn: () => getProjects(),
+  });
 
-  const workspaceRole = useSelector((state: RootState) => state.auth.workspaceRole);
+  const { workspaceRole } = useAuth();
 
+  const [showCreateForm, setShowCreateForm] = useState(false);
   const [name, setName] = useState("");
   const [key, setKey] = useState("");
   const [description, setDescription] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  // Expanded project ticket view state
+  // Modals state
   const [expandedProjects, setExpandedProjects] = useState<Record<string, boolean>>({});
-  // Modal target state
-  const [ticketModalProj, setTicketModalProj] = useState<any | null>(null);
+  const [ticketModalProj, setTicketModalProj] = useState<ProjectItem | null>(null);
+  const [settingsModalProj, setSettingsModalProj] = useState<ProjectItem | null>(null);
+  const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
 
-  const createMutation = useMutation<any, any, { name: string; key: string; description?: string }>({
-    mutationFn: (payload) => createProject(payload),
+  const createMutation = useMutation({
+    mutationFn: (payload: { name: string; key: string; description?: string }) =>
+      createProject(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       setName("");
       setKey("");
       setDescription("");
       setError(null);
+      setShowCreateForm(false);
     },
     onError: (err: any) => {
       setError(err.message || "Create project failed");
@@ -77,11 +161,15 @@ const ProjectsPage: React.FC = () => {
     setError(null);
 
     if (!name.trim() || !key.trim()) {
-      setError("Name and key are required");
+      setError("Project name and key are required");
       return;
     }
 
-    createMutation.mutate({ name: name.trim(), key: key.trim(), description: description.trim() });
+    createMutation.mutate({
+      name: name.trim(),
+      key: key.trim().toUpperCase(),
+      description: description.trim(),
+    });
   };
 
   const toggleTickets = (projectId: string) => {
@@ -91,31 +179,103 @@ const ProjectsPage: React.FC = () => {
     }));
   };
 
-  return (
-    <div style={{ padding: "24px" }}>
-      <h1 style={{ margin: "0 0 20px 0", fontSize: 24, fontWeight: 600 }}>Projects</h1>
+  const projects = data?.data ?? [];
 
-      {workspaceRole === "ADMIN" && (
-        <section style={{ marginBottom: 32, backgroundColor: "#fff", padding: 20, borderRadius: 8, border: "1px solid #E5E7EB" }}>
-          <h2 style={{ marginTop: 0, marginBottom: 16, fontSize: 16, fontWeight: 600 }}>Create project</h2>
-          <form onSubmit={handleCreate} style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 480 }}>
+  return (
+    <div style={{ padding: "28px", maxWidth: "1000px" }}>
+      {/* Page Header */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 24,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: 10,
+              backgroundColor: "#E0F6FF",
+              color: "#0284C7",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Layers size={22} />
+          </div>
+          <div>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 600, color: "#334155" }}>
+              Workspace Projects
+            </h1>
+            <p style={{ margin: "2px 0 0 0", fontSize: 13, color: "#64748B" }}>
+              Manage your projects, tickets, and membership permissions
+            </p>
+          </div>
+        </div>
+
+        {workspaceRole === "ADMIN" && (
+          <button
+            onClick={() => setShowCreateForm(!showCreateForm)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "9px 16px",
+              background: "linear-gradient(135deg, #008be3 0%, #30AFFF 100%)",
+              color: "white",
+              border: "none",
+              borderRadius: 8,
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: "pointer",
+              boxShadow: "0 4px 10px rgba(48, 175, 255, 0.25)",
+            }}
+          >
+            <Plus size={16} />
+            <span>{showCreateForm ? "Cancel" : "New Project"}</span>
+          </button>
+        )}
+      </div>
+
+      {/* Collapsible Create Project Form */}
+      {showCreateForm && (
+        <section
+          style={{
+            marginBottom: 24,
+            backgroundColor: "#FFFFFF",
+            padding: 20,
+            borderRadius: 12,
+            border: "1px solid #E0F2FE",
+            boxShadow: "0 4px 12px rgba(48, 175, 255, 0.08)",
+          }}
+        >
+          <h2 style={{ marginTop: 0, marginBottom: 14, fontSize: 15, fontWeight: 600, color: "#334155" }}>
+            Create New Project
+          </h2>
+
+          <form onSubmit={handleCreate} style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 500 }}>
             <input
-              placeholder="Project Name"
+              placeholder="Project Name (e.g. Mobile App)"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              style={{ padding: "8px 12px", border: "1px solid #D1D5DB", borderRadius: 6, fontSize: 14 }}
+              style={{ padding: "8px 12px", border: "1px solid #CBD5E1", borderRadius: 6, fontSize: 14 }}
             />
             <input
-              placeholder="Project Key (e.g. WEB)"
+              placeholder="Key identifier (e.g. MOB)"
               value={key}
               onChange={(e) => setKey(e.target.value)}
-              style={{ padding: "8px 12px", border: "1px solid #D1D5DB", borderRadius: 6, fontSize: 14 }}
+              style={{ padding: "8px 12px", border: "1px solid #CBD5E1", borderRadius: 6, fontSize: 14 }}
             />
-            <input
+            <textarea
+              rows={2}
               placeholder="Description (optional)"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              style={{ padding: "8px 12px", border: "1px solid #D1D5DB", borderRadius: 6, fontSize: 14 }}
+              style={{ padding: "8px 12px", border: "1px solid #CBD5E1", borderRadius: 6, fontSize: 14, fontFamily: "inherit" }}
             />
 
             {error && <div style={{ color: "#DC2626", fontSize: 13 }}>{error}</div>}
@@ -124,88 +284,221 @@ const ProjectsPage: React.FC = () => {
               type="submit"
               disabled={createMutation.isPending}
               style={{
-                padding: "8px 16px",
-                backgroundColor: "#2563EB",
+                alignSelf: "flex-start",
+                padding: "9px 18px",
+                background: "linear-gradient(135deg, #008be3 0%, #30AFFF 100%)",
                 color: "#fff",
                 border: "none",
-                borderRadius: 6,
+                borderRadius: 7,
                 cursor: "pointer",
-                fontSize: 14,
-                fontWeight: 500,
-                alignSelf: "flex-start"
+                fontSize: 13,
+                fontWeight: 600,
+                boxShadow: "0 4px 10px rgba(48, 175, 255, 0.25)",
               }}
             >
-              {createMutation.isPending ? "Creating..." : "Create Project"}
+              {createMutation.isPending ? "Creating..." : "Save Project"}
             </button>
           </form>
         </section>
       )}
 
-      <section style={{ backgroundColor: "#fff", padding: 20, borderRadius: 8, border: "1px solid #E5E7EB" }}>
-        <h2 style={{ marginTop: 0, marginBottom: 16, fontSize: 16, fontWeight: 600 }}>Your projects</h2>
+      {/* Projects List */}
+      <section
+        style={{
+          backgroundColor: "#FFFFFF",
+          padding: 24,
+          borderRadius: 12,
+          border: "1px solid #E2E8F0",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+        }}
+      >
+        <h2 style={{ marginTop: 0, marginBottom: 16, fontSize: 16, fontWeight: 600, color: "#334155" }}>
+          Active Projects ({projects.length})
+        </h2>
 
-        {isLoading && <div style={{ fontSize: 14, color: "#666" }}>Loading projects...</div>}
+        {isLoading && <div style={{ fontSize: 14, color: "#64748B" }}>Loading projects...</div>}
         {isError && <div style={{ color: "#DC2626", fontSize: 14 }}>Unable to load projects</div>}
 
-        {data && data.data && Array.isArray(data.data) ? (
-          <ul style={{ padding: 0, margin: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 16 }}>
-            {data.data.map((p: any) => (
-              <li key={p.id} style={{ borderBottom: "1px solid #F3F4F6", paddingBottom: 16 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        {!isLoading && projects.length === 0 && (
+          <div style={{ color: "#94A3B8", fontSize: 14, padding: "16px 0" }}>
+            No projects found in this workspace. Create your first project above!
+          </div>
+        )}
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          {projects.map((project: ProjectItem) => {
+            const isProjectAdmin = project.myRole === "ADMIN" || workspaceRole === "ADMIN";
+            const isArchived = !!project.archivedAt;
+
+            return (
+              <div
+                key={project.id}
+                style={{
+                  border: "1px solid #E2E8F0",
+                  borderRadius: 8,
+                  padding: 16,
+                  backgroundColor: isArchived ? "#F8FAFC" : "#FFFFFF",
+                  transition: "box-shadow 0.15s",
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
                   <div>
-                    <strong style={{ fontSize: 16, color: "#111827" }}>{p.name}</strong> <span style={{ color: "#6B7280", fontSize: 14 }}>({p.key})</span>
-                    <div style={{ fontSize: 13, color: "#6B7280", marginTop: 4 }}>{p.description || "No description"}</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <strong style={{ fontSize: 16, color: "#334155" }}>{project.name}</strong>
+                      <span
+                        style={{
+                          backgroundColor: "#E0F6FF",
+                          color: "#0284C7",
+                          fontSize: 12,
+                          fontWeight: 700,
+                          padding: "2px 8px",
+                          borderRadius: 4,
+                          border: "1px solid #BAE6FD",
+                        }}
+                      >
+                        {project.key}
+                      </span>
+                      {project.myRole && (
+                        <span
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 4,
+                            fontSize: 11,
+                            color: "#64748B",
+                            backgroundColor: "#F1F5F9",
+                            padding: "2px 6px",
+                            borderRadius: 4,
+                          }}
+                        >
+                          <Shield size={12} />
+                          {project.myRole}
+                        </span>
+                      )}
+                      {isArchived && (
+                        <span
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 4,
+                            fontSize: 11,
+                            color: "#EA580C",
+                            backgroundColor: "#FFF7ED",
+                            padding: "2px 6px",
+                            borderRadius: 4,
+                            border: "1px solid #FED7AA",
+                          }}
+                        >
+                          <Archive size={12} /> Archived
+                        </span>
+                      )}
+                    </div>
+
+                    <p style={{ fontSize: 13, color: "#64748B", margin: "6px 0 0 0" }}>
+                      {project.description || "No description provided."}
+                    </p>
                   </div>
 
-                  <div style={{ display: "flex", gap: 8 }}>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                     <button
-                      onClick={() => toggleTickets(p.id)}
+                      onClick={() => toggleTickets(project.id)}
                       style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 4,
                         padding: "6px 12px",
-                        backgroundColor: "#F3F4F6",
-                        border: "1px solid #D1D5DB",
+                        backgroundColor: "#F8FAFC",
+                        border: "1px solid #CBD5E1",
                         borderRadius: 6,
                         cursor: "pointer",
-                        fontSize: 13
+                        fontSize: 12,
+                        fontWeight: 500,
+                        color: "#334155",
                       }}
                     >
-                      {expandedProjects[p.id] ? "Hide Tickets" : "View Tickets"}
+                      <Ticket size={14} />
+                      <span>{expandedProjects[project.id] ? "Hide Tickets" : "View Tickets"}</span>
+                      {expandedProjects[project.id] ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                     </button>
-                    {p.myRole !== "VIEWER" && (
+
+                    {!isArchived && project.myRole !== "VIEWER" && (
                       <button
-                        onClick={() => setTicketModalProj(p)}
+                        onClick={() => setTicketModalProj(project)}
                         style={{
-                          padding: "6px 12px",
-                          backgroundColor: "#2563EB",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 4,
+                          padding: "7px 14px",
+                          background: "linear-gradient(135deg, #008be3 0%, #30AFFF 100%)",
                           color: "#fff",
                           border: "none",
                           borderRadius: 6,
                           cursor: "pointer",
-                          fontSize: 13
+                          fontSize: 12,
+                          fontWeight: 600,
+                          boxShadow: "0 2px 8px rgba(48, 175, 255, 0.25)",
                         }}
                       >
-                        Create Ticket
+                        <Plus size={14} />
+                        <span>Create Ticket</span>
+                      </button>
+                    )}
+
+                    {isProjectAdmin && (
+                      <button
+                        onClick={() => setSettingsModalProj(project)}
+                        style={{
+                          padding: "6px 8px",
+                          backgroundColor: "#F1F5F9",
+                          color: "#475569",
+                          border: "1px solid #CBD5E1",
+                          borderRadius: 6,
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                        title="Project Settings"
+                      >
+                        <Settings size={15} />
                       </button>
                     )}
                   </div>
                 </div>
 
-                {expandedProjects[p.id] && (
-                  <ProjectTicketsList projectId={p.id} />
+                {expandedProjects[project.id] && (
+                  <ProjectTicketsList
+                    projectId={project.id}
+                    onSelectTicket={(ticketId) => setSelectedTicketId(ticketId)}
+                  />
                 )}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          !isLoading && <div style={{ fontSize: 14, color: "#666" }}>No projects found.</div>
-        )}
+              </div>
+            );
+          })}
+        </div>
       </section>
 
+      {/* Create Ticket Modal */}
       {ticketModalProj && (
         <CreateTicketModal
           projectId={ticketModalProj.id}
           projectStates={ticketModalProj.states ?? []}
           onClose={() => setTicketModalProj(null)}
+        />
+      )}
+
+      {/* Project Settings Modal */}
+      {settingsModalProj && (
+        <ProjectSettingsModal
+          project={settingsModalProj}
+          onClose={() => setSettingsModalProj(null)}
+        />
+      )}
+
+      {/* Ticket Details & Discussion Modal */}
+      {selectedTicketId && (
+        <TicketDetailModal
+          issueId={selectedTicketId}
+          onClose={() => setSelectedTicketId(null)}
         />
       )}
     </div>
