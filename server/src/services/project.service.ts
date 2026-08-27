@@ -101,6 +101,9 @@ export async function createProject(userId: string, input: CreateProjectInput) {
     });
 
     return updatedProject;
+  }, {
+    maxWait: 10000,
+    timeout: 20000,
   });
 
   return {
@@ -198,4 +201,107 @@ export async function getProjectsForUser(userId: string) {
 
   return result;
 }
+
+import { UpdateProjectInput } from '../schemas/project.schema.js';
+import { UnprocessableError } from '../lib/errors.js';
+
+export async function updateProject(projectId: string, input: UpdateProjectInput) {
+  const project = await prisma.project.findFirst({
+    where: { id: projectId, deletedAt: null },
+  });
+
+  if (!project) {
+    throw NotFoundError('Project not found');
+  }
+
+  const updateData: any = {};
+  if (input.name !== undefined) {
+    updateData.name = input.name;
+  }
+  if (input.description !== undefined) {
+    updateData.description = input.description;
+  }
+  if (input.defaultStateId !== undefined) {
+    if (input.defaultStateId !== null) {
+      const state = await prisma.issueState.findFirst({
+        where: { id: input.defaultStateId, projectId },
+      });
+      if (!state) {
+        throw UnprocessableError('State does not belong to this project', 'INVALID_DEFAULT_STATE');
+      }
+      updateData.defaultStateId = input.defaultStateId;
+    } else {
+      updateData.defaultStateId = null;
+    }
+  }
+
+  return prisma.project.update({
+    where: { id: projectId },
+    data: updateData,
+    include: {
+      states: {
+        orderBy: { position: 'asc' },
+      },
+    },
+  });
+}
+
+export async function archiveProject(projectId: string) {
+  const project = await prisma.project.findFirst({
+    where: { id: projectId, deletedAt: null },
+  });
+
+  if (!project) {
+    throw NotFoundError('Project not found');
+  }
+
+  const updated = await prisma.project.update({
+    where: { id: projectId },
+    data: { archivedAt: new Date() },
+  });
+
+  return {
+    message: 'Project archived successfully',
+    archivedAt: updated.archivedAt,
+  };
+}
+
+export async function unarchiveProject(projectId: string) {
+  const project = await prisma.project.findFirst({
+    where: { id: projectId, deletedAt: null },
+  });
+
+  if (!project) {
+    throw NotFoundError('Project not found');
+  }
+
+  await prisma.project.update({
+    where: { id: projectId },
+    data: { archivedAt: null },
+  });
+
+  return {
+    message: 'Project unarchived successfully',
+  };
+}
+
+export async function deleteProject(projectId: string) {
+  const project = await prisma.project.findFirst({
+    where: { id: projectId, deletedAt: null },
+  });
+
+  if (!project) {
+    throw NotFoundError('Project not found');
+  }
+
+  await prisma.project.update({
+    where: { id: projectId },
+    data: { deletedAt: new Date() },
+  });
+
+  return {
+    message: 'Project deleted successfully',
+  };
+}
+
 
