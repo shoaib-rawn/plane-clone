@@ -195,11 +195,14 @@ async function main() {
   for (const p of PEOPLE) {
     const user = await prisma.user.upsert({
       where: { email: p.email },
-      update: {},
+      update: {
+        role: p.ws as any,
+      },
       create: {
         email: p.email,
         displayName: p.name,
         passwordHash: hash,
+        role: p.ws as any,
       },
     });
 

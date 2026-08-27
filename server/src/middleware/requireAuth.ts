@@ -18,13 +18,19 @@ export async function requireAuth(
   next: NextFunction
 ) {
   try {
-    const authHeader = req.headers.authorization;
+    // 1. Extract token from httpOnly cookie first, then fallback to Authorization header
+    let token: string | undefined = req.cookies?.token;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw UnauthorizedError('Authentication token required', 'UNAUTHORIZED');
+    if (!token) {
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.split(' ')[1];
+      }
     }
 
-    const token = authHeader.split(' ')[1];
+    if (!token) {
+      throw UnauthorizedError('Authentication token required', 'UNAUTHORIZED');
+    }
 
     let payload: TokenPayload;
     try {
