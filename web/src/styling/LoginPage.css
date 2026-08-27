@@ -15,6 +15,8 @@
   padding: 30px 20px;
 
   font-family:
+    var(--font-body),
+    "DM Sans",
     Inter,
     -apple-system,
     BlinkMacSystemFont,
@@ -25,15 +27,15 @@
   background:
     radial-gradient(
       circle at 20% 10%,
-      rgba(96, 165, 250, 0.3),
-      transparent 30%
+      rgba(146, 238, 255, 0.35),
+      transparent 35%
     ),
     radial-gradient(
       circle at 80% 90%,
-      rgba(59, 130, 246, 0.35),
-      transparent 35%
+      rgba(48, 175, 255, 0.4),
+      transparent 40%
     ),
-    linear-gradient(135deg, #0f172a 0%, #1e3a8a 45%, #2563eb 75%, #60a5fa 100%);
+    linear-gradient(135deg, #071526 0%, #0c243f 40%, #0f365c 70%, #30AFFF 100%);
 
   position: relative;
   overflow: hidden;
@@ -52,9 +54,9 @@
 
   border-radius: 50%;
 
-  background: rgba(255, 255, 255, 0.16);
+  background: rgba(146, 238, 255, 0.2);
 
-  filter: blur(10px);
+  filter: blur(25px);
 }
 
 .signin-page::after {
@@ -70,9 +72,9 @@
 
   border-radius: 50%;
 
-  background: rgba(30, 64, 175, 0.25);
+  background: rgba(48, 175, 255, 0.3);
 
-  filter: blur(8px);
+  filter: blur(25px);
 }
 
 .signin-card {
@@ -91,8 +93,8 @@
   border-radius: 22px;
 
   box-shadow:
-    0 30px 80px rgba(15, 23, 42, 0.22),
-    0 10px 30px rgba(37, 99, 235, 0.12);
+    0 30px 80px rgba(7, 21, 38, 0.3),
+    0 10px 30px rgba(48, 175, 255, 0.15);
 
   backdrop-filter: blur(16px);
 
@@ -105,8 +107,8 @@
   transform: translateY(-5px);
 
   box-shadow:
-    0 35px 90px rgba(15, 23, 42, 0.25),
-    0 15px 40px rgba(37, 99, 235, 0.16);
+    0 35px 90px rgba(7, 21, 38, 0.35),
+    0 15px 40px rgba(48, 175, 255, 0.2);
 }
 
 .brand {
@@ -129,11 +131,11 @@
 
   border-radius: 14px;
 
-  background: linear-gradient(135deg, #1d4ed8, #2563eb, #3b82f6);
+  background: linear-gradient(135deg, #008be3, #30AFFF, #92EEFF);
 
   color: #ffffff;
 
-  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 10px 25px rgba(48, 175, 255, 0.35);
 
   transition:
     transform 0.25s ease,
@@ -143,7 +145,7 @@
 .brand-logo:hover {
   transform: rotate(-5deg) scale(1.05);
 
-  box-shadow: 0 14px 30px rgba(37, 99, 235, 0.38);
+  box-shadow: 0 14px 30px rgba(48, 175, 255, 0.45);
 }
 
 .brand h1 {
@@ -154,7 +156,7 @@
 
   letter-spacing: -0.8px;
 
-  background: linear-gradient(135deg, #1d4ed8, #2563eb, #60a5fa);
+  background: linear-gradient(135deg, #071526, #0c243f, #30AFFF);
 
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -171,7 +173,7 @@
 .signin-heading h2 {
   margin: 0 0 8px;
 
-  color: #0f172a;
+  color: #1e293b;
 
   font-size: 26px;
   font-weight: 800;
@@ -225,7 +227,7 @@
 
   background: #f8fafc;
 
-  color: #0f172a;
+  color: #1e293b;
 
   font-size: 14px;
   font-weight: 500;
@@ -247,17 +249,17 @@
 .input-group input:hover {
   background: #ffffff;
 
-  border-color: #93c5fd;
+  border-color: #92EEFF;
 }
 
 .input-group input:focus {
   background: #ffffff;
 
-  border-color: #2563eb;
+  border-color: #30AFFF;
 
   box-shadow:
-    0 0 0 4px rgba(37, 99, 235, 0.12),
-    0 4px 12px rgba(37, 99, 235, 0.06);
+    0 0 0 4px rgba(48, 175, 255, 0.15),
+    0 4px 12px rgba(48, 175, 255, 0.08);
 
   transform: translateY(-1px);
 }
@@ -303,9 +305,9 @@
 }
 
 .password-toggle:hover {
-  background: #eff6ff;
+  background: #e0f6ff;
 
-  color: #2563eb;
+  color: #30AFFF;
 }
 
 .password-toggle:active {
@@ -355,8 +357,7 @@
   border: none;
   border-radius: 11px;
 
-  /* SAME REGISTER BUTTON */
-  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #3b82f6 100%);
+  background: linear-gradient(135deg, #008be3 0%, #30AFFF 60%, #54c2ff 100%);
 
   color: #ffffff;
 
@@ -367,7 +368,7 @@
 
   cursor: pointer;
 
-  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.28);
+  box-shadow: 0 8px 22px rgba(48, 175, 255, 0.35);
 
   transition:
     transform 0.2s ease,
@@ -378,15 +379,15 @@
 .signin-button:hover:not(:disabled) {
   transform: translateY(-2px);
 
-  filter: brightness(1.05);
+  filter: brightness(1.06);
 
-  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.35);
+  box-shadow: 0 12px 28px rgba(48, 175, 255, 0.45);
 }
 
 .signin-button:active:not(:disabled) {
   transform: translateY(0);
 
-  box-shadow: 0 5px 12px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 5px 12px rgba(48, 175, 255, 0.25);
 }
 
 .signin-button:disabled {
@@ -436,7 +437,7 @@
 
   background: transparent;
 
-  color: #2563eb;
+  color: #0284c7;
 
   font-size: 13px;
   font-weight: 700;
@@ -449,9 +450,9 @@
 }
 
 .register-text button:hover {
-  background: #eff6ff;
+  background: #e0f6ff;
 
-  color: #1d4ed8;
+  color: #0369a1;
 
   text-decoration: none;
 }

@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom";
 
 import Sidebar from "./Sidebar";
-import Navbar from "./Navbar";
+// import Navbar from "./Navbar";
 
 import "../styling/layout/AppLayout.css";
 
@@ -11,7 +11,7 @@ const AppLayout = () => {
       <Sidebar />
 
       <div className="app-main">
-        <Navbar />
+        {/* <Navbar /> */}
 
         <main className="page-content">
           <Outlet />

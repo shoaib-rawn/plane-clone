@@ -1,27 +1,23 @@
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useSelector } from "react-redux";
-import { 
-  FolderKanban, 
-  Ticket, 
-  Clock, 
-  AlertTriangle
-} from "lucide-react";
+import { Layers, ListTodo, Timer, Flame } from "lucide-react";
 import { getProjects } from "../features/projects/api/projectApi";
 import { getMyTickets } from "../features/tickets/api/ticketApi";
-import type { RootState } from "../store/store";
+import TicketDetailModal from "../components/TicketDetailModal";
+import { useAuth } from "../context/AuthContext";
 import "../styling/Dashboard.css";
 
 const Dashboard: React.FC = () => {
-  const userName = useSelector((state: RootState) => state.auth.userName);
+  const { userName } = useAuth();
+  const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
 
-  // Fetch projects list
+  // 1. Fetch projects list
   const { data: projectsRes, isLoading: loadingProjects } = useQuery<any>({
     queryKey: ["projects"],
     queryFn: getProjects,
   });
 
-  // Fetch my tickets list
+  // 2. Fetch my tickets list
   const { data: ticketsRes, isLoading: loadingTickets } = useQuery<any>({
     queryKey: ["myTickets"],
     queryFn: getMyTickets,
@@ -33,13 +29,18 @@ const Dashboard: React.FC = () => {
   // Compute stats
   const totalProjects = projects.length;
   const totalTickets = tickets.length;
-  const openTickets = tickets.filter(
-    (t: any) => {
-      const g = t.state?.group?.toLowerCase();
-      return g === "backlog" || g === "unstarted" || g === "started" || g === "todo" || g === "in_progress" || g === "in progress";
-    }
-  ).length;
-  
+  const openTickets = tickets.filter((t: any) => {
+    const g = t.state?.group?.toLowerCase();
+    return (
+      g === "backlog" ||
+      g === "unstarted" ||
+      g === "started" ||
+      g === "todo" ||
+      g === "in_progress" ||
+      g === "in progress"
+    );
+  }).length;
+
   const urgentTickets = tickets.filter(
     (t: any) => t.priority === "URGENT" || t.priority === "HIGH"
   ).length;
@@ -76,7 +77,7 @@ const Dashboard: React.FC = () => {
       <section className="stats-grid">
         <div className="stat-card">
           <div className="stat-icon-wrapper projects-bg">
-            <FolderKanban size={20} />
+            <Layers size={20} />
           </div>
           <div className="stat-info">
             <span className="stat-label">Active Projects</span>
@@ -86,7 +87,7 @@ const Dashboard: React.FC = () => {
 
         <div className="stat-card">
           <div className="stat-icon-wrapper tickets-bg">
-            <Ticket size={20} />
+            <ListTodo size={20} />
           </div>
           <div className="stat-info">
             <span className="stat-label">My Tickets</span>
@@ -96,7 +97,7 @@ const Dashboard: React.FC = () => {
 
         <div className="stat-card">
           <div className="stat-icon-wrapper open-bg">
-            <Clock size={20} />
+            <Timer size={20} />
           </div>
           <div className="stat-info">
             <span className="stat-label">Open Work</span>
@@ -106,7 +107,7 @@ const Dashboard: React.FC = () => {
 
         <div className="stat-card">
           <div className="stat-icon-wrapper urgent-bg">
-            <AlertTriangle size={20} />
+            <Flame size={20} />
           </div>
           <div className="stat-info">
             <span className="stat-label">Urgent / High</span>
@@ -131,21 +132,29 @@ const Dashboard: React.FC = () => {
           ) : (
             <ul className="ticket-list">
               {tickets.slice(0, 8).map((ticket: any) => (
-                <li key={ticket.id} className="ticket-row">
-                  <span className="ticket-key">{ticket.key || `${ticket.project?.key}-${ticket.sequenceId}`}</span>
+                <li
+                  key={ticket.id}
+                  className="ticket-row clickable"
+                  onClick={() => setSelectedTicketId(ticket.id)}
+                  title="Click to view details, discussion & activity"
+                  style={{ cursor: "pointer" }}
+                >
+                  <span className="ticket-key">
+                    {ticket.key || `${ticket.project?.key}-${ticket.sequenceId}`}
+                  </span>
                   <div className="ticket-details">
                     <span className="ticket-title">{ticket.title}</span>
                     <div className="ticket-meta">
-                      <span className={`priority-badge ${ticket.priority.toLowerCase()}`}>
-                        {ticket.priority}
+                      <span className={`priority-badge ${(ticket.priority || "NONE").toLowerCase()}`}>
+                        {ticket.priority || "NONE"}
                       </span>
                       {ticket.state && (
-                        <span 
-                          className="state-indicator" 
-                          style={{ 
+                        <span
+                          className="state-indicator"
+                          style={{
                             borderColor: ticket.state.colour,
                             backgroundColor: `${ticket.state.colour}10`,
-                            color: ticket.state.colour
+                            color: ticket.state.colour,
                           }}
                         >
                           {ticket.state.name}
@@ -164,7 +173,7 @@ const Dashboard: React.FC = () => {
           <div className="section-header">
             <h3>Projects Overview</h3>
           </div>
-          
+
           {projects.length === 0 ? (
             <div className="empty-state">
               <p>No projects found in this workspace.</p>
@@ -186,6 +195,14 @@ const Dashboard: React.FC = () => {
           )}
         </section>
       </div>
+
+      {/* Ticket Details & Discussion Modal */}
+      {selectedTicketId && (
+        <TicketDetailModal
+          issueId={selectedTicketId}
+          onClose={() => setSelectedTicketId(null)}
+        />
+      )}
     </div>
   );
 };
