@@ -84,7 +84,7 @@ const LoginPage = () => {
             <CheckSquare size={28} strokeWidth={2.5} />
           </div>
 
-          <h1>Miniplan</h1>
+          <h1>Planora</h1>
         </div>
 
         <div className="signin-heading">
@@ -133,6 +133,23 @@ const LoginPage = () => {
               }));
             }}
           />
+          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "-6px", marginBottom: "6px" }}>
+            <button
+              type="button"
+              onClick={() => navigate("/forgot-password")}
+              style={{
+                background: "none",
+                border: "none",
+                color: "#2563EB",
+                fontSize: "13px",
+                fontWeight: 500,
+                cursor: "pointer",
+                padding: 0,
+              }}
+            >
+              Forgot password?
+            </button>
+          </div>
 
           {error && <p className="error-message">{error}</p>}
 

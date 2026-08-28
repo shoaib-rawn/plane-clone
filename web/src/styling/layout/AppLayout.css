@@ -7,12 +7,14 @@
   background:
     radial-gradient(
       circle at 85% 10%,
-      rgba(59, 130, 246, 0.08),
+      rgba(146, 238, 255, 0.12),
       transparent 28%
     ),
-    linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #eff6ff 100%);
+    linear-gradient(135deg, #f8fafc 0%, #f0f9ff 50%, #e0f2fe 100%);
 
   font-family:
+    var(--font-body),
+    "DM Sans",
     Inter,
     -apple-system,
     BlinkMacSystemFont,
@@ -35,7 +37,7 @@
   background: linear-gradient(
     135deg,
     rgba(248, 250, 252, 0.96),
-    rgba(239, 246, 255, 0.92)
+    rgba(240, 249, 255, 0.92)
   );
 
   position: relative;
@@ -55,7 +57,7 @@
 
   box-sizing: border-box;
 
-  color: #0f172a;
+  color: #334155;
 
   animation: pageFadeIn 0.35s ease;
 }
@@ -69,13 +71,13 @@
 }
 
 .page-content::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #2563eb, #60a5fa);
+  background: linear-gradient(180deg, #30AFFF, #92EEFF);
 
   border-radius: 10px;
 }
 
 .page-content::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #1d4ed8, #3b82f6);
+  background: linear-gradient(180deg, #008be3, #30AFFF);
 }
 
 .page-content {

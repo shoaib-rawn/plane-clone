@@ -89,7 +89,7 @@ const RegisterPage = () => {
             <CheckSquare size={27} strokeWidth={2.5} />
           </div>
 
-          <h1>Miniplan</h1>
+          <h1>Planora</h1>
         </div>
 
         {/* Heading */}

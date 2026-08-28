@@ -1,15 +1,15 @@
 import { Navigate, Outlet } from "react-router-dom";
-import { useSelector } from "react-redux";
-
-import type { RootState } from "../store/store";
+import { useAuth } from "../context/AuthContext";
 
 const PrivateRoute = () => {
-  const { isAuthenticated, isInitializing } = useSelector(
-    (state: RootState) => state.auth,
-  );
+  const { isAuthenticated, isLoading } = useAuth();
 
-  if (isInitializing) {
-    return <div>Loading...</div>;
+  if (isLoading) {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#F8FAFC" }}>
+        <div style={{ color: "#64748B", fontSize: 14 }}>Loading workspace...</div>
+      </div>
+    );
   }
 
   if (!isAuthenticated) {

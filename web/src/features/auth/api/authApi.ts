@@ -16,14 +16,28 @@ export const registerUser = async (userData: RegisterPayload) => {
   });
 };
 
+export const logoutUser = async () => {
+  return apiClient<{ data: { message: string } }>(`${AUTH_BASE_URL}/logout`, {
+    method: "POST",
+  });
+};
+
+export const forgotPassword = async (email: string) => {
+  return apiClient<{ data: { message: string } }>(`${AUTH_BASE_URL}/forgot-password`, {
+    method: "POST",
+    body: { email },
+  });
+};
+
+export const resetPassword = async (token: string, password: string) => {
+  return apiClient<{ data: { message: string } }>(`${AUTH_BASE_URL}/reset-password`, {
+    method: "POST",
+    body: { token, password },
+  });
+};
+
 export const getMe = async () => {
-  const token = localStorage.getItem("token");
-
-  if (!token) {
-    throw new Error("No authentication token found");
-  }
-
-  return apiClient<{ data: { user: { displayName: string }; workspaceRole: "ADMIN" | "MEMBER" } }>(`${AUTH_BASE_URL}/me`, {
+  return apiClient<{ data: { user: { displayName: string; role?: string }; workspaceRole: "ADMIN" | "MEMBER" } }>(`${AUTH_BASE_URL}/me`, {
     method: "GET",
   });
 };
