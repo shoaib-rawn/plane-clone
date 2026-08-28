@@ -13,6 +13,7 @@ import { createProjectSchema, updateProjectSchema } from '../schemas/project.sch
 import {
   createProject,
   getProjectsForUser,
+  getProjectById,
   updateProject,
   archiveProject,
   unarchiveProject,
@@ -34,6 +35,16 @@ export const createProjectController = asyncHandler(async (req: Request, res: Re
 export const getProjectsController = asyncHandler(async (req: Request, res: Response) => {
   const userId = req.user!.id;
   const result = await getProjectsForUser(userId);
+
+  return res.status(200).json({
+    data: result,
+  });
+});
+
+export const getProjectByIdController = asyncHandler(async (req: Request, res: Response) => {
+  const userId = req.user!.id;
+  const { projectId } = req.params;
+  const result = await getProjectById(userId, projectId);
 
   return res.status(200).json({
     data: result,

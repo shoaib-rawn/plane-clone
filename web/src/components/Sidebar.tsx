@@ -2,12 +2,11 @@ import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   ChevronLeft,
-  ChevronRight,
-  Layers,
-  LayoutGrid,
-  ListTodo,
+  Folder,
+  BarChart2,
+  Ticket,
   LogOut,
-  SlidersHorizontal,
+  Settings,
   CircleUserRound,
   Users2,
   type LucideIcon,
@@ -19,17 +18,18 @@ type NavItem = {
   to: string;
   label: string;
   icon: LucideIcon;
+  iconColor: string;
 };
 
 const primaryNavigation: NavItem[] = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutGrid },
-  { to: "/projects", label: "Projects", icon: Layers },
-  { to: "/my-tickets", label: "My Tickets", icon: ListTodo },
+  { to: "/dashboard", label: "Dashboard", icon: BarChart2, iconColor: "#34D399" },
+  { to: "/projects", label: "Projects", icon: Folder, iconColor: "#FBBF24" },
+  { to: "/my-tickets", label: "My Tickets", icon: Ticket, iconColor: "#38BDF8" },
 ];
 
 const workspaceNavigation: NavItem[] = [
-  { to: "/members", label: "Members", icon: Users2 },
-  { to: "/settings", label: "Settings", icon: SlidersHorizontal },
+  { to: "/members", label: "Members", icon: Users2, iconColor: "#EC4899" },
+  { to: "/settings", label: "Settings", icon: Settings, iconColor: "#FB923C" },
 ];
 
 const Sidebar = () => {
@@ -54,7 +54,7 @@ const Sidebar = () => {
   };
 
   const renderNavItems = (items: NavItem[]) =>
-    items.map(({ to, label, icon: Icon }) => (
+    items.map(({ to, label, icon: Icon, iconColor }) => (
       <NavLink
         key={to}
         to={to}
@@ -63,8 +63,8 @@ const Sidebar = () => {
         }
         title={isCollapsed ? label : undefined}
       >
-        <Icon className="nav-icon" size={18} />
-        {!isCollapsed && <span className="nav-label">{label}</span>}
+        <Icon className="nav-icon" size={18} style={{ color: iconColor }} />
+        <span className="nav-label">{label}</span>
       </NavLink>
     ));
 
@@ -74,11 +74,7 @@ const Sidebar = () => {
     <aside className={`sidebar ${isCollapsed ? "collapsed" : ""}`}>
       <div className="sidebar-header">
         <div className="sidebar-logo">
-          {isCollapsed ? (
-            <span className="logo-short">PL</span>
-          ) : (
-            <h2>Planora</h2>
-          )}
+          <h2>Planora</h2>
         </div>
 
         <button
@@ -88,18 +84,15 @@ const Sidebar = () => {
           title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
-          {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+          <ChevronLeft size={18} className="toggle-chevron" />
         </button>
       </div>
 
       <nav className="sidebar-nav">
         {renderNavItems(primaryNavigation)}
 
-        {isCollapsed ? (
-          <div className="sidebar-divider" />
-        ) : (
-          <div className="sidebar-section-title">WORKSPACE</div>
-        )}
+        <div className="sidebar-section-title">WORKSPACE</div>
+        <div className="sidebar-divider" />
 
         {renderNavItems(workspaceNavigation)}
       </nav>
@@ -112,8 +105,8 @@ const Sidebar = () => {
           }
           title={isCollapsed ? displayName : undefined}
         >
-          <CircleUserRound className="nav-icon" size={18} />
-          {!isCollapsed && <span className="nav-label">{displayName}</span>}
+          <CircleUserRound className="nav-icon" size={18} style={{ color: "#C084FC" }} />
+          <span className="nav-label">{displayName}</span>
         </NavLink>
 
         <button
@@ -122,8 +115,8 @@ const Sidebar = () => {
           onClick={handleLogout}
           title={isCollapsed ? "Logout" : undefined}
         >
-          <LogOut className="nav-icon" size={18} />
-          {!isCollapsed && <span className="nav-label">Logout</span>}
+          <LogOut className="nav-icon logout-icon" size={18} style={{ color: "#F87171" }} />
+          <span className="nav-label">Logout</span>
         </button>
       </div>
     </aside>

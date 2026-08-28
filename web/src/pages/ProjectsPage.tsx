@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getProjects,
@@ -8,17 +9,16 @@ import {
 import { getProjectTickets, type TicketDetails } from "../features/tickets/api/ticketApi";
 import CreateTicketModal from "../components/CreateTicketModal";
 import TicketDetailModal from "../components/TicketDetailModal";
-import ProjectSettingsModal from "../components/ProjectSettingsModal";
 import { useAuth } from "../context/AuthContext";
 import {
   Layers,
   Plus,
-  Settings,
   ChevronDown,
   ChevronUp,
   Ticket,
   Shield,
   Archive,
+  Kanban,
 } from "lucide-react";
 
 interface ProjectTicketsListProps {
@@ -120,6 +120,7 @@ const ProjectTicketsList: React.FC<ProjectTicketsListProps> = ({
 };
 
 const ProjectsPage: React.FC = () => {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data, isLoading, isError } = useQuery<{ data: ProjectItem[] }>({
     queryKey: ["projects"],
@@ -137,7 +138,6 @@ const ProjectsPage: React.FC = () => {
   // Modals state
   const [expandedProjects, setExpandedProjects] = useState<Record<string, boolean>>({});
   const [ticketModalProj, setTicketModalProj] = useState<ProjectItem | null>(null);
-  const [settingsModalProj, setSettingsModalProj] = useState<ProjectItem | null>(null);
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
 
   const createMutation = useMutation({
@@ -198,8 +198,8 @@ const ProjectsPage: React.FC = () => {
               width: 42,
               height: 42,
               borderRadius: 10,
-              backgroundColor: "#E0F6FF",
-              color: "#0284C7",
+              backgroundColor: "#EDE9FE",
+              color: "#6D28D9",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -208,7 +208,7 @@ const ProjectsPage: React.FC = () => {
             <Layers size={22} />
           </div>
           <div>
-            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 600, color: "#334155" }}>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 600, color: "#1E293B" }}>
               Workspace Projects
             </h1>
             <p style={{ margin: "2px 0 0 0", fontSize: 13, color: "#64748B" }}>
@@ -221,27 +221,29 @@ const ProjectsPage: React.FC = () => {
           <button
             onClick={() => setShowCreateForm(!showCreateForm)}
             style={{
+              backgroundColor: "#8B5CF6",
+              color: "#FFFFFF",
+              border: "none",
+              borderRadius: 8,
+              padding: "9px 16px",
+              cursor: "pointer",
               display: "flex",
               alignItems: "center",
               gap: 6,
-              padding: "9px 16px",
-              background: "linear-gradient(135deg, #008be3 0%, #30AFFF 100%)",
-              color: "white",
-              border: "none",
-              borderRadius: 8,
               fontSize: 13,
               fontWeight: 600,
-              cursor: "pointer",
-              boxShadow: "0 4px 10px rgba(48, 175, 255, 0.25)",
+              transition: "background-color 0.15s ease",
             }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#7C3AED")}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#8B5CF6")}
           >
             <Plus size={16} />
-            <span>{showCreateForm ? "Cancel" : "New Project"}</span>
+            <span>New Project</span>
           </button>
         )}
       </div>
 
-      {/* Collapsible Create Project Form */}
+      {/* Inline Create Form */}
       {showCreateForm && (
         <section
           style={{
@@ -249,11 +251,11 @@ const ProjectsPage: React.FC = () => {
             backgroundColor: "#FFFFFF",
             padding: 20,
             borderRadius: 12,
-            border: "1px solid #E0F2FE",
-            boxShadow: "0 4px 12px rgba(48, 175, 255, 0.08)",
+            border: "1px solid #E5E7EB",
+            boxShadow: "0 1px 3px rgba(0, 0, 0, 0.04)",
           }}
         >
-          <h2 style={{ marginTop: 0, marginBottom: 14, fontSize: 15, fontWeight: 600, color: "#334155" }}>
+          <h2 style={{ marginTop: 0, marginBottom: 14, fontSize: 15, fontWeight: 600, color: "#1E293B" }}>
             Create New Project
           </h2>
 
@@ -286,15 +288,17 @@ const ProjectsPage: React.FC = () => {
               style={{
                 alignSelf: "flex-start",
                 padding: "9px 18px",
-                background: "linear-gradient(135deg, #008be3 0%, #30AFFF 100%)",
+                backgroundColor: "#8B5CF6",
                 color: "#fff",
                 border: "none",
                 borderRadius: 7,
                 cursor: "pointer",
                 fontSize: 13,
                 fontWeight: 600,
-                boxShadow: "0 4px 10px rgba(48, 175, 255, 0.25)",
+                transition: "background-color 0.15s ease",
               }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#7C3AED")}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#8B5CF6")}
             >
               {createMutation.isPending ? "Creating..." : "Save Project"}
             </button>
@@ -308,11 +312,11 @@ const ProjectsPage: React.FC = () => {
           backgroundColor: "#FFFFFF",
           padding: 24,
           borderRadius: 12,
-          border: "1px solid #E2E8F0",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+          border: "1px solid #E5E7EB",
+          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.04)",
         }}
       >
-        <h2 style={{ marginTop: 0, marginBottom: 16, fontSize: 16, fontWeight: 600, color: "#334155" }}>
+        <h2 style={{ marginTop: 0, marginBottom: 16, fontSize: 16, fontWeight: 600, color: "#1E293B" }}>
           Active Projects ({projects.length})
         </h2>
 
@@ -327,33 +331,55 @@ const ProjectsPage: React.FC = () => {
 
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           {projects.map((project: ProjectItem) => {
-            const isProjectAdmin = project.myRole === "ADMIN" || workspaceRole === "ADMIN";
             const isArchived = !!project.archivedAt;
 
             return (
               <div
                 key={project.id}
                 style={{
-                  border: "1px solid #E2E8F0",
-                  borderRadius: 8,
-                  padding: 16,
-                  backgroundColor: isArchived ? "#F8FAFC" : "#FFFFFF",
-                  transition: "box-shadow 0.15s",
+                  border: "1px solid #E5E7EB",
+                  borderRadius: 10,
+                  padding: "16px 20px",
+                  backgroundColor: isArchived ? "#F9FAFB" : "#FFFFFF",
+                  boxShadow: "0 1px 3px rgba(0, 0, 0, 0.02)",
+                  transition: "all 0.15s ease",
                 }}
               >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
-                  <div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <strong style={{ fontSize: 16, color: "#334155" }}>{project.name}</strong>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: 16,
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <div style={{ flex: "1 1 300px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                      <strong
+                        onClick={() => navigate(`/projects/${project.id}/tickets`)}
+                        style={{
+                          fontSize: 16,
+                          fontWeight: 700,
+                          color: "#1E293B",
+                          cursor: "pointer",
+                          transition: "color 0.15s",
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.color = "#6D28D9")}
+                        onMouseLeave={(e) => (e.currentTarget.style.color = "#1E293B")}
+                        title="Open Kanban Board"
+                      >
+                        {project.name}
+                      </strong>
                       <span
                         style={{
-                          backgroundColor: "#E0F6FF",
-                          color: "#0284C7",
+                          backgroundColor: "#EDE9FE",
+                          color: "#6D28D9",
                           fontSize: 12,
                           fontWeight: 700,
                           padding: "2px 8px",
                           borderRadius: 4,
-                          border: "1px solid #BAE6FD",
+                          border: "1px solid #DDD6FE",
                         }}
                       >
                         {project.key}
@@ -361,13 +387,15 @@ const ProjectsPage: React.FC = () => {
                       {project.myRole && (
                         <span
                           style={{
-                            display: "flex",
+                            display: "inline-flex",
                             alignItems: "center",
                             gap: 4,
                             fontSize: 11,
-                            color: "#64748B",
-                            backgroundColor: "#F1F5F9",
-                            padding: "2px 6px",
+                            fontWeight: 600,
+                            color: "#6D28D9",
+                            backgroundColor: "#EDE9FE",
+                            border: "1px solid #DDD6FE",
+                            padding: "2px 8px",
                             borderRadius: 4,
                           }}
                         >
@@ -378,13 +406,14 @@ const ProjectsPage: React.FC = () => {
                       {isArchived && (
                         <span
                           style={{
-                            display: "flex",
+                            display: "inline-flex",
                             alignItems: "center",
                             gap: 4,
                             fontSize: 11,
+                            fontWeight: 600,
                             color: "#EA580C",
                             backgroundColor: "#FFF7ED",
-                            padding: "2px 6px",
+                            padding: "2px 8px",
                             borderRadius: 4,
                             border: "1px solid #FED7AA",
                           }}
@@ -399,25 +428,54 @@ const ProjectsPage: React.FC = () => {
                     </p>
                   </div>
 
-                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                    <button
+                      onClick={() => navigate(`/projects/${project.id}/tickets`)}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 6,
+                        height: 34,
+                        padding: "0 14px",
+                        backgroundColor: "#EDE9FE",
+                        border: "1px solid #DDD6FE",
+                        borderRadius: 8,
+                        cursor: "pointer",
+                        fontSize: 12,
+                        fontWeight: 600,
+                        color: "#6D28D9",
+                        transition: "all 0.15s ease",
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#DDD6FE")}
+                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#EDE9FE")}
+                      title="Open Kanban Ticket Board"
+                    >
+                      <Kanban size={14} />
+                      <span>Kanban Board</span>
+                    </button>
+
                     <button
                       onClick={() => toggleTickets(project.id)}
                       style={{
-                        display: "flex",
+                        display: "inline-flex",
                         alignItems: "center",
-                        gap: 4,
-                        padding: "6px 12px",
+                        gap: 5,
+                        height: 34,
+                        padding: "0 12px",
                         backgroundColor: "#F8FAFC",
-                        border: "1px solid #CBD5E1",
-                        borderRadius: 6,
+                        border: "1px solid #E2E8F0",
+                        borderRadius: 8,
                         cursor: "pointer",
                         fontSize: 12,
                         fontWeight: 500,
                         color: "#334155",
+                        transition: "all 0.15s ease",
                       }}
+                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#F1F5F9")}
+                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#F8FAFC")}
                     >
                       <Ticket size={14} />
-                      <span>{expandedProjects[project.id] ? "Hide Tickets" : "View Tickets"}</span>
+                      <span>{expandedProjects[project.id] ? "Hide List" : "Quick List"}</span>
                       {expandedProjects[project.id] ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                     </button>
 
@@ -425,41 +483,25 @@ const ProjectsPage: React.FC = () => {
                       <button
                         onClick={() => setTicketModalProj(project)}
                         style={{
-                          display: "flex",
+                          display: "inline-flex",
                           alignItems: "center",
-                          gap: 4,
-                          padding: "7px 14px",
-                          background: "linear-gradient(135deg, #008be3 0%, #30AFFF 100%)",
-                          color: "#fff",
+                          gap: 5,
+                          height: 34,
+                          padding: "0 14px",
+                          backgroundColor: "#8B5CF6",
+                          color: "#FFFFFF",
                           border: "none",
-                          borderRadius: 6,
+                          borderRadius: 8,
                           cursor: "pointer",
                           fontSize: 12,
                           fontWeight: 600,
-                          boxShadow: "0 2px 8px rgba(48, 175, 255, 0.25)",
+                          transition: "background-color 0.15s ease",
                         }}
+                        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#7C3AED")}
+                        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#8B5CF6")}
                       >
                         <Plus size={14} />
                         <span>Create Ticket</span>
-                      </button>
-                    )}
-
-                    {isProjectAdmin && (
-                      <button
-                        onClick={() => setSettingsModalProj(project)}
-                        style={{
-                          padding: "6px 8px",
-                          backgroundColor: "#F1F5F9",
-                          color: "#475569",
-                          border: "1px solid #CBD5E1",
-                          borderRadius: 6,
-                          cursor: "pointer",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                        title="Project Settings"
-                      >
-                        <Settings size={15} />
                       </button>
                     )}
                   </div>
@@ -483,14 +525,6 @@ const ProjectsPage: React.FC = () => {
           projectId={ticketModalProj.id}
           projectStates={ticketModalProj.states ?? []}
           onClose={() => setTicketModalProj(null)}
-        />
-      )}
-
-      {/* Project Settings Modal */}
-      {settingsModalProj && (
-        <ProjectSettingsModal
-          project={settingsModalProj}
-          onClose={() => setSettingsModalProj(null)}
         />
       )}
 

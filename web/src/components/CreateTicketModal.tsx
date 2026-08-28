@@ -204,7 +204,7 @@ const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ projectId, projec
                 padding: "9px 18px",
                 border: "none",
                 borderRadius: 7,
-                background: "linear-gradient(135deg, #008be3 0%, #30AFFF 100%)",
+                backgroundColor: "#8B5CF6",
                 color: "#fff",
                 cursor: "pointer",
                 fontSize: 14,
@@ -212,8 +212,10 @@ const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ projectId, projec
                 display: "flex",
                 alignItems: "center",
                 gap: 6,
-                boxShadow: "0 4px 10px rgba(48, 175, 255, 0.25)",
+                transition: "background-color 0.15s ease",
               }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#7C3AED")}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#8B5CF6")}
             >
               {createMutation.isPending && <LoaderCircle size={16} className="spinner" />}
               <span>{createMutation.isPending ? "Creating..." : "Create Ticket"}</span>

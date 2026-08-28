@@ -14,19 +14,28 @@ const MyTicketsPage: React.FC = () => {
 
   const tickets = data?.data ?? [];
 
-  const getPriorityStyle = (priority: string) => {
-    switch (priority) {
-      case "URGENT":
-        return { color: "#C53030", backgroundColor: "#FEE2E2", border: "1px solid #FEB2B2" };
-      case "HIGH":
-        return { color: "#9A3412", backgroundColor: "#FFEDD5", border: "1px solid #FDBA74" };
-      case "MEDIUM":
-        return { color: "#0284C7", backgroundColor: "#E0F6FF", border: "1px solid #BAE6FD" };
-      case "LOW":
-        return { color: "#475569", backgroundColor: "#F3F4F6", border: "1px solid #E5E7EB" };
-      default:
-        return { color: "#6B7280", backgroundColor: "#F9FAFB", border: "1px solid #E5E7EB" };
+  const getStateClass = (stateName?: string, stateGroup?: string) => {
+    const group = (stateGroup || "").toLowerCase();
+    const name = (stateName || "").toLowerCase();
+
+    if (group === "unstarted" || group === "backlog" || name === "todo" || name === "backlog") {
+      return "state-badge state-todo";
     }
+    if (group === "started" || name.includes("progress") || name.includes("doing") || name.includes("in progress")) {
+      return "state-badge state-in-progress";
+    }
+    if (group === "completed" || name === "done" || name.includes("complete")) {
+      return "state-badge state-done";
+    }
+    if (group === "cancelled" || name === "cancelled") {
+      return "state-badge state-cancelled";
+    }
+    return "state-badge state-todo";
+  };
+
+  const getPriorityClass = (priority: string) => {
+    const p = (priority || "none").toLowerCase();
+    return `priority-badge priority-${p}`;
   };
 
   return (
@@ -37,8 +46,8 @@ const MyTicketsPage: React.FC = () => {
             width: 40,
             height: 40,
             borderRadius: 10,
-            backgroundColor: "#E0F6FF",
-            color: "#0284C7",
+            backgroundColor: "#EDE9FE",
+            color: "#6D28D9",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -47,7 +56,7 @@ const MyTicketsPage: React.FC = () => {
           <ListTodo size={22} />
         </div>
         <div>
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 600, color: "#334155" }}>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 600, color: "#1E293B" }}>
             My Assigned Tickets
           </h1>
           <p style={{ margin: "2px 0 0 0", fontSize: 13, color: "#64748B" }}>
@@ -100,15 +109,15 @@ const MyTicketsPage: React.FC = () => {
         <div
           style={{
             overflowX: "auto",
-            border: "1px solid #E2E8F0",
+            border: "1px solid #E5E7EB",
             borderRadius: 12,
-            backgroundColor: "#fff",
+            backgroundColor: "#FFFFFF",
             boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
           }}
         >
           <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
             <thead>
-              <tr style={{ backgroundColor: "#F8FAFC", borderBottom: "1px solid #E2E8F0" }}>
+              <tr style={{ backgroundColor: "#F8FAFC", borderBottom: "1px solid #E5E7EB" }}>
                 <th style={{ padding: "12px 16px", color: "#4B5563", fontWeight: 600, fontSize: 13 }}>
                   Key
                 </th>
@@ -139,50 +148,41 @@ const MyTicketsPage: React.FC = () => {
                     cursor: "pointer",
                     transition: "background-color 0.15s",
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#F8FBFF")}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#FAF5FF")}
                   onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
                   title="Click to view details, discussion & activity"
                 >
-                  <td style={{ padding: "12px 16px", fontWeight: 700, color: "#0284C7", fontSize: 13 }}>
-                    <span style={{ backgroundColor: "#E0F6FF", padding: "2px 6px", borderRadius: 4 }}>
+                  <td style={{ padding: "12px 16px", fontSize: 13 }}>
+                    <span
+                      style={{
+                        backgroundColor: "#EDE9FE",
+                        color: "#6D28D9",
+                        padding: "2px 6px",
+                        borderRadius: 4,
+                        fontWeight: 700,
+                        border: "1px solid #DDD6FE",
+                      }}
+                    >
                       {ticket.key}
                     </span>
                   </td>
-                  <td style={{ padding: "12px 16px", color: "#334155", fontSize: 14, fontWeight: 500 }}>
+                  <td style={{ padding: "12px 16px", color: "#1E293B", fontSize: 14, fontWeight: 500 }}>
                     {ticket.title}
                   </td>
                   <td style={{ padding: "12px 16px", color: "#4B5563", fontSize: 13 }}>
                     {ticket.project?.name ?? "Unknown"}
                   </td>
                   <td style={{ padding: "12px 16px", fontSize: 13 }}>
-                    <span
-                      style={{
-                        padding: "4px 8px",
-                        borderRadius: 12,
-                        fontSize: 12,
-                        fontWeight: 500,
-                        backgroundColor: ticket.state?.colour ? `${ticket.state.colour}18` : "#F3F4F6",
-                        color: ticket.state?.colour ?? "#374151",
-                        border: `1px solid ${ticket.state?.colour ? `${ticket.state.colour}40` : "#D1D5DB"}`,
-                      }}
-                    >
-                      {ticket.state?.name ?? "Unknown"}
+                    <span className={getStateClass(ticket.state?.name, ticket.state?.group)}>
+                      {ticket.state?.name ?? "Todo"}
                     </span>
                   </td>
                   <td style={{ padding: "12px 16px", fontSize: 13 }}>
-                    <span
-                      style={{
-                        padding: "3px 8px",
-                        borderRadius: 4,
-                        fontSize: 11,
-                        fontWeight: 600,
-                        ...getPriorityStyle(ticket.priority),
-                      }}
-                    >
+                    <span className={getPriorityClass(ticket.priority)}>
                       {ticket.priority}
                     </span>
                   </td>
-                  <td style={{ padding: "12px 16px", color: "#6B7280", fontSize: 13 }}>
+                  <td style={{ padding: "12px 16px", color: "#64748B", fontSize: 13 }}>
                     {ticket.dueDate ? (
                       <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                         <Calendar size={14} />

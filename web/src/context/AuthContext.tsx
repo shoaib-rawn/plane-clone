@@ -31,9 +31,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // 1. Initial Session Check: Verify session cookie via GET /api/v1/auth/me
   useEffect(() => {
+    let isMounted = true;
+
     const initializeAuth = async () => {
       try {
         const res = await getMe();
+        if (!isMounted) return;
         const meUser = res.data.user;
         const meRole = res.data.workspaceRole;
 
@@ -42,17 +45,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setWorkspaceRole(meRole);
         setIsAuthenticated(true);
       } catch (err) {
-        // No active session cookie or expired
+        if (!isMounted) return;
         setUser(null);
         setUserName("");
         setWorkspaceRole(null);
         setIsAuthenticated(false);
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
     initializeAuth();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // 2. Login Handler: Updates in-memory state (Cookie is handled automatically by browser)

@@ -1,14 +1,12 @@
 import { useState } from "react";
 import { CheckSquare, LoaderCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
 import FormInput from "../components/FormInput";
-
 import {
   isStrongPassword,
   isValidEmail,
 } from "../features/auth/utils/validation";
-import "../styling/RegisterPage.css";
+import "../styling/LoginPage.css";
 import { useRegister } from "../features/auth/hooks/useRegister";
 
 const RegisterPage = () => {
@@ -30,7 +28,8 @@ const RegisterPage = () => {
   // Register API
   const registerMutation = useRegister();
 
-  const handleRegister = () => {
+  const handleRegister = (e: React.FormEvent) => {
+    e.preventDefault();
     // Clear previous error
     setError("");
 
@@ -72,7 +71,6 @@ const RegisterPage = () => {
           setError("");
           navigate("/login");
         },
-
         onError: (error) => {
           setError(error.message);
         },
@@ -81,25 +79,25 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="register-page">
-      <div className="register-card">
+    <div className="signin-page">
+      <div className="signin-card">
         {/* Brand */}
-        <div className="register-brand">
-          <div className="register-logo">
-            <CheckSquare size={27} strokeWidth={2.5} />
+        <div className="brand">
+          <div className="brand-logo">
+            <CheckSquare size={28} strokeWidth={2.5} />
           </div>
 
           <h1>Planora</h1>
         </div>
 
         {/* Heading */}
-        <div className="register-heading">
+        <div className="signin-heading">
           <h2>Create your account</h2>
           <p>Get started by creating your workspace account.</p>
         </div>
 
         {/* Form */}
-        <div className="register-form">
+        <form className="signin-form" onSubmit={handleRegister}>
           {/* Name */}
           <FormInput
             id="name"
@@ -107,7 +105,6 @@ const RegisterPage = () => {
             placeholder="Enter your name"
             value={name}
             autoComplete="name"
-            containerClassName="register-input-group"
             onChange={(event) => {
               setName(event.target.value);
               setError("");
@@ -122,7 +119,6 @@ const RegisterPage = () => {
             placeholder="Enter your email"
             value={email}
             autoComplete="email"
-            containerClassName="register-input-group"
             onChange={(event) => {
               setEmail(event.target.value);
               setError("");
@@ -137,9 +133,6 @@ const RegisterPage = () => {
             placeholder="Create a password"
             value={password}
             autoComplete="new-password"
-            containerClassName="register-input-group"
-            passwordWrapperClassName="register-password-wrapper"
-            passwordToggleClassName="register-password-toggle"
             showPasswordToggle
             isPasswordVisible={showPassword}
             onTogglePassword={() => setShowPassword((current) => !current)}
@@ -157,9 +150,6 @@ const RegisterPage = () => {
             placeholder="Confirm your password"
             value={confirmPassword}
             autoComplete="new-password"
-            containerClassName="register-input-group"
-            passwordWrapperClassName="register-password-wrapper"
-            passwordToggleClassName="register-password-toggle"
             showPasswordToggle
             isPasswordVisible={showConfirmPassword}
             onTogglePassword={() =>
@@ -172,28 +162,27 @@ const RegisterPage = () => {
           />
 
           {/* Error */}
-          {error && <p className="register-error">{error}</p>}
+          {error && <p className="error-message">{error}</p>}
 
           {/* Submit */}
           <button
-            type="button"
-            className="register-button"
-            onClick={handleRegister}
+            type="submit"
+            className="signin-button"
             disabled={registerMutation.isPending}
           >
             {registerMutation.isPending ? (
               <>
-                <LoaderCircle size={18} className="register-spinner" />
+                <LoaderCircle size={18} className="spinner" />
                 <span>Creating account...</span>
               </>
             ) : (
               "Create account"
             )}
           </button>
-        </div>
+        </form>
 
-        {/* Login */}
-        <div className="login-text">
+        {/* Login Link */}
+        <div className="register-text">
           <span>Already have an account?</span>
 
           <button type="button" onClick={() => navigate("/login")}>

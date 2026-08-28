@@ -66,7 +66,7 @@ const ProfilePage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div style={{ padding: "32px", color: "#64748b" }}>
+      <div style={{ padding: "32px", color: "#64748B" }}>
         Loading profile details...
       </div>
     );
@@ -79,18 +79,18 @@ const ProfilePage: React.FC = () => {
           style={{
             width: 44,
             height: 44,
-            borderRadius: "50%",
-            backgroundColor: "#E0F6FF",
-            color: "#0284C7",
+            borderRadius: 10,
+            backgroundColor: "#EDE9FE",
+            color: "#6D28D9",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
           }}
         >
-          <User size={24} />
+          <User size={22} />
         </div>
         <div>
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 600, color: "#334155" }}>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 600, color: "#1E293B" }}>
             Account Profile
           </h1>
           <p style={{ margin: "2px 0 0 0", fontSize: 13, color: "#64748B" }}>
@@ -102,10 +102,10 @@ const ProfilePage: React.FC = () => {
       <div
         style={{
           backgroundColor: "#FFFFFF",
-          border: "1px solid #E0F2FE",
+          border: "1px solid #E5E7EB",
           borderRadius: 12,
           padding: 24,
-          boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.03)",
         }}
       >
         {success && (
@@ -160,7 +160,7 @@ const ProfilePage: React.FC = () => {
                 alignItems: "center",
                 gap: 8,
                 backgroundColor: "#F8FAFC",
-                border: "1px solid #E2E8F0",
+                border: "1px solid #E5E7EB",
                 padding: "8px 12px",
                 borderRadius: 6,
                 color: "#64748B",
@@ -183,7 +183,7 @@ const ProfilePage: React.FC = () => {
                 alignItems: "center",
                 gap: 8,
                 backgroundColor: "#F8FAFC",
-                border: "1px solid #E2E8F0",
+                border: "1px solid #E5E7EB",
                 padding: "8px 12px",
                 borderRadius: 6,
                 color: "#64748B",
@@ -191,7 +191,17 @@ const ProfilePage: React.FC = () => {
               }}
             >
               <Shield size={16} />
-              <span style={{ fontWeight: 600, color: "#334155" }}>
+              <span
+                style={{
+                  fontWeight: 600,
+                  backgroundColor: "#EDE9FE",
+                  color: "#6D28D9",
+                  padding: "2px 8px",
+                  borderRadius: 4,
+                  fontSize: 12,
+                  border: "1px solid #DDD6FE",
+                }}
+              >
                 {workspaceRole || userData?.role || "MEMBER"}
               </span>
             </div>
@@ -199,7 +209,7 @@ const ProfilePage: React.FC = () => {
 
           {/* Display Name Input */}
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <label style={{ fontSize: 13, fontWeight: 500, color: "#334155" }}>
+            <label style={{ fontSize: 13, fontWeight: 500, color: "#1E293B" }}>
               Display Name
             </label>
             <input
@@ -208,18 +218,27 @@ const ProfilePage: React.FC = () => {
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder="e.g. Alex Morgan"
               style={{
-                padding: "8px 12px",
-                borderRadius: 6,
-                border: "1px solid #CBD5E1",
+                padding: "9px 12px",
+                borderRadius: 8,
+                border: "1px solid #E5E7EB",
                 fontSize: 14,
                 outline: "none",
+                transition: "all 0.15s ease",
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = "#8B5CF6";
+                e.target.style.boxShadow = "0 0 0 3px #EDE9FE";
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = "#E5E7EB";
+                e.target.style.boxShadow = "none";
               }}
             />
           </div>
 
           {/* Avatar URL Input */}
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <label style={{ fontSize: 13, fontWeight: 500, color: "#334155" }}>
+            <label style={{ fontSize: 13, fontWeight: 500, color: "#1E293B" }}>
               Avatar Image URL (Optional)
             </label>
             <input
@@ -228,11 +247,20 @@ const ProfilePage: React.FC = () => {
               onChange={(e) => setAvatarUrl(e.target.value)}
               placeholder="https://example.com/avatar.png"
               style={{
-                padding: "8px 12px",
-                borderRadius: 6,
-                border: "1px solid #CBD5E1",
+                padding: "9px 12px",
+                borderRadius: 8,
+                border: "1px solid #E5E7EB",
                 fontSize: 14,
                 outline: "none",
+                transition: "all 0.15s ease",
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = "#8B5CF6";
+                e.target.style.boxShadow = "0 0 0 3px #EDE9FE";
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = "#E5E7EB";
+                e.target.style.boxShadow = "none";
               }}
             />
           </div>
@@ -243,7 +271,7 @@ const ProfilePage: React.FC = () => {
             style={{
               alignSelf: "flex-start",
               padding: "10px 22px",
-              background: "linear-gradient(135deg, #008be3 0%, #30AFFF 100%)",
+              backgroundColor: "#8B5CF6",
               color: "white",
               border: "none",
               borderRadius: 8,
@@ -251,8 +279,10 @@ const ProfilePage: React.FC = () => {
               fontWeight: 600,
               cursor: "pointer",
               marginTop: 6,
-              boxShadow: "0 4px 12px rgba(48, 175, 255, 0.25)",
+              transition: "background-color 0.15s ease",
             }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#7C3AED")}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#8B5CF6")}
           >
             {updateMutation.isPending ? "Saving..." : "Save Profile"}
           </button>

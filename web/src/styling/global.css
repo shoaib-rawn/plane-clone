@@ -6,27 +6,39 @@
 @import "@fontsource/dm-sans/700.css";
 
 :root {
-  /* Main Color Palette: #92EEFF and #30AFFF */
-  --primary: #30AFFF;
-  --primary-hover: #0ca0fc;
-  --primary-dark: #0084d6;
-  --primary-light: #e6f7ff;
-  --primary-border: #bae6fd;
+  /* Indigo/Purple Design Tokens */
+  --primary: #8B5CF6;
+  --primary-hover: #7C3AED;
+  --primary-active: #6D28D9;
+  --primary-focus: #C4B5FD;
+  --primary-light: #EDE9FE;
+  --primary-border: #DDD6FE;
   
-  --accent-cyan: #92EEFF;
-  --accent-cyan-hover: #75e8fc;
-  --accent-cyan-light: #f0fbff;
-  --accent-cyan-border: #a5f1ff;
+  --sidebar-bg: #1E1B4B;
+  --sidebar-nav: #A5B4FC;
+  --sidebar-hover: #312E81;
+  --sidebar-active-bg: #312E81;
+  --sidebar-active-border: #8B5CF6;
+  --sidebar-pressed: #4338CA;
 
-  --gradient-primary: linear-gradient(135deg, #30AFFF 0%, #008de0 100%);
-  --gradient-cyan: linear-gradient(135deg, #92EEFF 0%, #30AFFF 100%);
-  --gradient-dark: linear-gradient(180deg, #081627 0%, #0c2642 45%, #0f365c 100%);
+  --badge-bg: #EDE9FE;
+  --badge-hover: #DDD6FE;
+  --badge-active: #8B5CF6;
+  --badge-text: #6D28D9;
+  --badge-border: #DDD6FE;
 
-  /* Softer, non-harsh light-black & slate tones */
-  --text-heading: #334155;   /* Smooth soft slate heading */
-  --text-main: #475569;      /* Gentle body text */
-  --text-secondary: #64748b; /* Soft subtitle */
-  --text-muted: #94a3b8;     /* Muted/subtle text */
+  --bg-canvas: #FAFAFA;
+  --card-bg: #FFFFFF;
+  --card-border: #E5E7EB;
+
+  --danger: #EF4444;
+  --danger-hover: #DC2626;
+
+  /* Typography Colors */
+  --text-heading: #1E293B;
+  --text-main: #475569;
+  --text-secondary: #64748B;
+  --text-muted: #94A3B8;
 
   --font-heading: 'Cal Sans', 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -52,12 +64,12 @@ body {
   margin: 0;
   padding: 0;
   color: var(--text-main);
-  background-color: #f8fafc;
+  background-color: var(--bg-canvas);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Global Headings Implementation with Cal Sans - Soft Light Black */
+/* Global Headings Implementation with Cal Sans */
 h1,
 h2,
 h3,
@@ -82,21 +94,278 @@ h6,
   letter-spacing: 0.015em;
 }
 
-/* Dashboard banner heading remains bright on dark background */
-.dashboard-header h1 {
-  font-family: 'Cal Sans', var(--font-heading) !important;
-  color: #ffffff !important;
-  font-weight: 600 !important;
-  letter-spacing: 0.01em;
-}
-
 .sidebar-logo h2 {
   font-family: 'Cal Sans', var(--font-heading) !important;
+  color: #FFFFFF !important;
   font-weight: 600 !important;
   letter-spacing: 0.01em;
 }
 
-/* Custom Scrollbars in primary cyan/blue theme */
+/* ==========================================================================
+   Image 1: Primary Button States
+   ========================================================================== */
+.btn-primary {
+  background: #8B5CF6;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.btn-primary:hover {
+  background: #7C3AED;
+}
+
+.btn-primary:active {
+  background: #6D28D9;
+  transform: scale(0.98);
+}
+
+.btn-primary:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px #C4B5FD;
+}
+
+.btn-primary:disabled {
+  background: #DDD6FE;
+  color: #A78BFA;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ==========================================================================
+   Image 2: Secondary / Ghost Button States
+   ========================================================================== */
+.btn-secondary {
+  background: #FFFFFF;
+  color: #6D28D9;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.btn-secondary:hover {
+  background: #EDE9FE;
+  border-color: #DDD6FE;
+}
+
+.btn-secondary:active {
+  background: #DDD6FE;
+  color: #5B21B6;
+}
+
+.btn-secondary:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px #C4B5FD;
+}
+
+.btn-secondary:disabled {
+  background: #F9FAFB;
+  color: #94A3B8;
+  border-color: #E5E7EB;
+  cursor: not-allowed;
+}
+
+/* ==========================================================================
+   Image 4: Card / List Item States
+   ========================================================================== */
+.card {
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  background: #FAFAFA;
+  border-color: #DDD6FE;
+}
+
+.card.selected {
+  background: #EDE9FE;
+  border-color: #C4B5FD;
+}
+
+.card:focus-visible {
+  outline: none;
+  border-color: #8B5CF6;
+  box-shadow: 0 0 0 3px #EDE9FE;
+}
+
+/* ==========================================================================
+   State & Priority Badges
+   ========================================================================== */
+.state-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.state-badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* State variants */
+.state-badge.state-todo,
+.state-badge.state-unstarted,
+.state-badge.state-backlog {
+  background-color: #EEF2FF;
+  color: #4F46E5;
+  border: 1px solid #C7D2FE;
+}
+.state-badge.state-todo::before,
+.state-badge.state-unstarted::before,
+.state-badge.state-backlog::before {
+  background-color: #6366F1;
+}
+
+.state-badge.state-in-progress,
+.state-badge.state-started {
+  background-color: #FFFBEB;
+  color: #B45309;
+  border: 1px solid #FDE68A;
+}
+.state-badge.state-in-progress::before,
+.state-badge.state-started::before {
+  background-color: #F59E0B;
+}
+
+.state-badge.state-done,
+.state-badge.state-complete,
+.state-badge.state-completed {
+  background-color: #ECFDF5;
+  color: #047857;
+  border: 1px solid #A7F3D0;
+}
+.state-badge.state-done::before,
+.state-badge.state-complete::before,
+.state-badge.state-completed::before {
+  background-color: #10B981;
+}
+
+.state-badge.state-cancelled {
+  background-color: #F3F4F6;
+  color: #6B7280;
+  border: 1px solid #E5E7EB;
+}
+.state-badge.state-cancelled::before {
+  background-color: #9CA3AF;
+}
+
+/* Priority Badges - Severity-Based Palette */
+.priority-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.priority-badge.priority-urgent {
+  background-color: #FEE2E2;
+  color: #B91C1C;
+  border: 1px solid #FCA5A5;
+}
+
+.priority-badge.priority-high {
+  background-color: #FEF2F2;
+  color: #DC2626;
+  border: 1px solid #FECACA;
+}
+
+.priority-badge.priority-medium {
+  background-color: #FFFBEB;
+  color: #D97706;
+  border: 1px solid #FDE68A;
+}
+
+.priority-badge.priority-low {
+  background-color: #EFF6FF;
+  color: #2563EB;
+  border: 1px solid #BFDBFE;
+}
+
+.priority-badge.priority-none {
+  background-color: #F8FAFC;
+  color: #94A3B8;
+  border: 1px solid #E2E8F0;
+}
+
+/* ==========================================================================
+   Image 5: Input / Form States
+   ========================================================================== */
+input,
+select,
+textarea {
+  border: 1px solid #E5E7EB;
+  background: #FFFFFF;
+  color: #1E293B;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+input:hover,
+select:hover,
+textarea:hover {
+  border-color: #C4B5FD;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #8B5CF6;
+  box-shadow: 0 0 0 3px #EDE9FE;
+}
+
+input.error,
+select.error,
+textarea.error {
+  border-color: #FCA5A5;
+  box-shadow: 0 0 0 3px #FEE2E2;
+}
+
+input:disabled,
+select:disabled,
+textarea:disabled {
+  background: #F9FAFB;
+  color: #94A3B8;
+  cursor: not-allowed;
+}
+
+/* Custom Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -107,10 +376,10 @@ h6,
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #30AFFF, #92EEFF);
+  background: #E5E7EB;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #30AFFF;
+  background: #CBD5E1;
 }
