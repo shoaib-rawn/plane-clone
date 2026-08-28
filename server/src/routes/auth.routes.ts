@@ -13,7 +13,7 @@ import { authRateLimiter } from '../middleware/rateLimiter.js';
 
 export const authRouter = Router();
 
-authRouter.post('/register', authRateLimiter, registerController);
+authRouter.post('/create-user', requireAuth, registerController);
 authRouter.post('/login', authRateLimiter, loginController);
 authRouter.post('/logout', logoutController);
 authRouter.post('/forgot-password', authRateLimiter, forgotPasswordController);
