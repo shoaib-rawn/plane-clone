@@ -6,19 +6,21 @@ import { hashPassword, verifyPassword, generateToken } from '../lib/auth.js';
 import { RegisterInput, LoginInput } from '../schemas/auth.schema.js';
 
 export async function registerUser(input: RegisterInput): Promise<{ user: PublicUser; workspaceRole: string; token: string }> {
+  // Hash password first (can be done in parallel or before DB calls)
   const passwordHash = await hashPassword(input.password);
 
+  // 1. Check existing user and find default workspace in parallel to save database roundtrips
+  const [existingUser, workspace] = await Promise.all([
+    prisma.user.findUnique({ where: { email: input.email } }),
+    prisma.workspace.findUnique({ where: { slug: 'acme' } }),
+  ]);
+
+  if (existingUser) {
+    throw ConflictError('An account with this email already exists', 'EMAIL_TAKEN');
+  }
+
+  // 2. Run sequential writes inside transaction
   const user = await prisma.$transaction(async (tx) => {
-    // 1. Check existing user inside transaction block using tx
-    const existingUser = await tx.user.findUnique({
-      where: { email: input.email },
-    });
-
-    if (existingUser) {
-      throw ConflictError('An account with this email already exists', 'EMAIL_TAKEN');
-    }
-
-    // 2. Create new user
     const newUser = await tx.user.create({
       data: {
         email: input.email,
@@ -27,12 +29,6 @@ export async function registerUser(input: RegisterInput): Promise<{ user: Public
       },
     });
 
-    // 3. Find default workspace (slug: 'acme') to attach member
-    const workspace = await tx.workspace.findUnique({
-      where: { slug: 'acme' },
-    });
-
-    // 4. Assign workspace membership
     if (workspace) {
       await tx.workspaceMember.create({
         data: {
@@ -58,8 +54,14 @@ export async function registerUser(input: RegisterInput): Promise<{ user: Public
 const DUMMY_HASH = '$2b$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ01234';
 
 export async function loginUser(input: LoginInput): Promise<{ user: PublicUser; workspaceRole: string; token: string }> {
+  // Query user and workspace memberships together in a single request
   const user = await prisma.user.findUnique({
     where: { email: input.email },
+    include: {
+      workspaceMemberships: {
+        select: { role: true },
+      },
+    },
   });
 
   const passwordHashToVerify = user ? user.passwordHash : DUMMY_HASH;
@@ -70,15 +72,11 @@ export async function loginUser(input: LoginInput): Promise<{ user: PublicUser; 
   }
 
   const token = generateToken(user.id);
-
-  const workspaceMember = await prisma.workspaceMember.findFirst({
-    where: { userId: user.id },
-    select: { role: true },
-  });
+  const workspaceRole = user.workspaceMemberships[0]?.role || 'MEMBER';
 
   return {
     user: toPublicUser(user),
-    workspaceRole: workspaceMember?.role || 'MEMBER',
+    workspaceRole,
     token,
   };
 }
