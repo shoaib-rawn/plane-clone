@@ -13,6 +13,7 @@ import { requireAuth } from '../middleware/requireAuth.js';
 export const authRouter = Router();
 
 authRouter.post('/register', registerController);
+authRouter.post('/create-user', registerController);
 authRouter.post('/login', loginController);
 authRouter.post('/logout', logoutController);
 authRouter.post('/forgot-password', forgotPasswordController);
