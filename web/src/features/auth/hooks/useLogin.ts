@@ -13,20 +13,22 @@ export const useLogin = () => {
       const userName = data.data.user.displayName;
       const workspaceRole = data.data.workspaceRole;
 
-      // Seed the currentUser cache immediately for instant transition
-      queryClient.setQueryData(["currentUser"], {
-        data: {
-          user: data.data.user,
-          workspaceRole: data.data.workspaceRole,
+      // Seed the currentUser cache immediately so /me is not called again
+      queryClient.setQueryData(
+        ["currentUser"],
+        {
+          data: {
+            user: data.data.user,
+            workspaceRole: data.data.workspaceRole,
+          },
         },
-      });
+        { updatedAt: Date.now() }
+      );
 
       login({
         displayName: userName,
         workspaceRole: workspaceRole,
       });
-
-      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
     },
     onError: (error) => {
       console.error("Login failed:", error);

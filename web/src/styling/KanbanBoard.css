@@ -228,7 +228,7 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   cursor: grab;
   user-select: none;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
   position: relative;
 }
 
@@ -243,19 +243,23 @@
 }
 
 .kanban-card.is-dragging {
-  opacity: 0.35;
-  border: 1px dashed #8B5CF6;
+  opacity: 0.25;
+  background: #F1F5F9;
+  border: 1.5px dashed #A5B4FC;
+  box-shadow: none;
 }
 
 .kanban-card.is-updating {
-  opacity: 0.6;
-  pointer-events: none;
+  /* Instant solid rendering without any blur or delay */
+  opacity: 1;
 }
 
 .kanban-card-overlay {
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.16);
-  border-color: #8B5CF6;
-  transform: rotate(2deg) scale(1.03);
+  box-shadow: 0 16px 36px rgba(139, 92, 246, 0.25), 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1.5px solid #8B5CF6 !important;
+  background: #FFFFFF !important;
+  opacity: 1 !important;
+  transform: rotate(1.5deg) scale(1.02);
   cursor: grabbing;
 }
 

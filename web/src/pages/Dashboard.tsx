@@ -9,7 +9,7 @@ import { useAuth } from "../context/AuthContext";
 import "../styling/Dashboard.css";
 
 const Dashboard: React.FC = () => {
-  const { userName } = useAuth();
+  const { userName, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [donutFilter, setDonutFilter] = useState<string | null>(null);
 
@@ -17,12 +17,14 @@ const Dashboard: React.FC = () => {
   const { data: projectsRes, isLoading: loadingProjects } = useQuery<any>({
     queryKey: ["projects"],
     queryFn: getProjects,
+    enabled: isAuthenticated,
   });
 
   // 2. Fetch my tickets list
   const { data: ticketsRes, isLoading: loadingTickets } = useQuery<any>({
     queryKey: ["myTickets"],
     queryFn: getMyTickets,
+    enabled: isAuthenticated,
   });
 
   const projects = projectsRes?.data ?? [];

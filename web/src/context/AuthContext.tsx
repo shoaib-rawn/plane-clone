@@ -30,6 +30,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const {
     data: meData,
     isLoading,
+    isPending,
     isError,
   } = useQuery({
     queryKey: ["currentUser"],
@@ -38,6 +39,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     staleTime: 1000 * 60 * 5, // 5 minutes fresh in cache
   });
 
+  const isAuthLoading = isPending || isLoading;
   const meUser = meData?.data?.user;
   const meRole = meData?.data?.workspaceRole;
 
@@ -46,18 +48,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const workspaceRole: WorkspaceRole | null = meRole || null;
   const isAuthenticated = !isError && !!meUser;
 
-  // 2. Login Handler: Invalidates and refetches currentUser
-  const login = (_loginData: { displayName: string; workspaceRole: WorkspaceRole }) => {
-    queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+  // 2. Login Handler: Updates in-memory currentUser cache
+  const login = (loginData: { displayName: string; workspaceRole: WorkspaceRole }) => {
+    queryClient.setQueryData(["currentUser"], (old: any) => {
+      if (old?.data?.user) return old;
+      return {
+        data: {
+          user: { displayName: loginData.displayName },
+          workspaceRole: loginData.workspaceRole,
+        },
+      };
+    });
   };
 
-  // 3. Logout Handler: Calls POST /auth/logout, removes currentUser and clears private cache
+  // 3. Logout Handler: Calls POST /auth/logout, clears session and cache
   const logout = async () => {
     try {
       await logoutUser();
     } catch (err) {
       console.warn("Logout request completed with notice:", err);
     } finally {
+      queryClient.setQueryData(["currentUser"], null);
       queryClient.removeQueries({ queryKey: ["currentUser"] });
       queryClient.clear();
     }
@@ -85,7 +96,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         userName,
         workspaceRole,
         isAuthenticated,
-        isLoading,
+        isLoading: isAuthLoading,
         login,
         logout,
         updateUser,
