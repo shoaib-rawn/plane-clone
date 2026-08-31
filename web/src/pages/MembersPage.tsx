@@ -98,7 +98,7 @@ const MembersPage: React.FC = () => {
       removeProjectMember(payload.projectId, payload.memberId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projectMembers", selectedProjectId] });
-      setSuccess("Member removed from project!");
+      setSuccess("Member removed successfully!");
       setError(null);
     },
     onError: (err: any) => {
@@ -107,27 +107,26 @@ const MembersPage: React.FC = () => {
     },
   });
 
-  // Keep first available user selected in dropdown
+  const members: any[] = membersData?.data ?? [];
+
+  // Auto select first user in dropdown when users load
   useEffect(() => {
     if (!selectedUserToAdd && users.length > 0) {
       setSelectedUserToAdd(users[0].id);
     }
   }, [users, selectedUserToAdd]);
 
-  const members: any[] = membersData?.data ?? [];
-  const selectedProject = projects.find((p) => p.id === selectedProjectId);
-  const myRole = selectedProject?.myRole;
-
-  // Role Permissions (Backend Matrix):
-  // - Admin (workspace or project) can add/remove members and change roles
-  // - Member & Viewer can only view members list
-  const canManageMembers = workspaceRole === "ADMIN" || myRole === "ADMIN";
-
   const handleAddMember = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedProjectId || !selectedUserToAdd) return;
-    setError(null);
-    setSuccess(null);
+    if (!selectedProjectId) {
+      setError("Please select a project first.");
+      return;
+    }
+    if (!selectedUserToAdd) {
+      setError("Please select a user to add.");
+      return;
+    }
+
     addMemberMutation.mutate({
       projectId: selectedProjectId,
       userId: selectedUserToAdd,
@@ -135,17 +134,21 @@ const MembersPage: React.FC = () => {
     });
   };
 
+  const selectedProject = projects.find((p) => p.id === selectedProjectId);
+  const myRole = selectedProject?.myRole;
+  const canManageMembers = myRole === "ADMIN" || myRole === "MEMBER" || workspaceRole === "ADMIN";
+
   return (
     <div style={{ padding: "28px", maxWidth: "900px" }}>
-      {/* Page Header */}
+      {/* Header */}
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
         <div
           style={{
-            width: 42,
-            height: 42,
+            width: 44,
+            height: 44,
             borderRadius: 10,
-            backgroundColor: "#E0F6FF",
-            color: "#0284C7",
+            backgroundColor: "#EDE9FE",
+            color: "#6D28D9",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -154,7 +157,7 @@ const MembersPage: React.FC = () => {
           <Users size={22} />
         </div>
         <div>
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 600, color: "#334155" }}>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 600, color: "#1E293B" }}>
             Project Members
           </h1>
           <p style={{ margin: "2px 0 0 0", fontSize: 13, color: "#64748B" }}>
@@ -167,7 +170,7 @@ const MembersPage: React.FC = () => {
       <div
         style={{
           backgroundColor: "#FFFFFF",
-          border: "1px solid #E0F2FE",
+          border: "1px solid #E5E7EB",
           borderRadius: 10,
           padding: "16px 20px",
           marginBottom: 20,
@@ -177,8 +180,8 @@ const MembersPage: React.FC = () => {
           boxShadow: "0 1px 3px rgba(0,0,0,0.03)",
         }}
       >
-        <FolderKanban size={18} color="#0284C7" />
-        <label style={{ fontSize: 13, fontWeight: 600, color: "#334155" }}>
+        <FolderKanban size={18} color="#6D28D9" />
+        <label style={{ fontSize: 13, fontWeight: 600, color: "#1E293B" }}>
           Active Project:
         </label>
         <select
@@ -190,13 +193,13 @@ const MembersPage: React.FC = () => {
           }}
           style={{
             padding: "8px 12px",
-            borderRadius: 6,
-            border: "1px solid #CBD5E1",
+            borderRadius: 8,
+            border: "1px solid #E5E7EB",
             fontSize: 14,
             outline: "none",
             backgroundColor: "#F8FAFC",
             fontWeight: 500,
-            color: "#334155",
+            color: "#1E293B",
             cursor: "pointer",
             minWidth: "220px",
           }}
@@ -213,9 +216,9 @@ const MembersPage: React.FC = () => {
             style={{
               marginLeft: "auto",
               fontSize: 12,
-              backgroundColor: "#E0F6FF",
-              color: "#0284C7",
-              border: "1px solid #BAE6FD",
+              backgroundColor: "#EDE9FE",
+              color: "#6D28D9",
+              border: "1px solid #DDD6FE",
               padding: "4px 10px",
               borderRadius: 6,
               fontWeight: 600,
@@ -276,16 +279,16 @@ const MembersPage: React.FC = () => {
         <section
           style={{
             backgroundColor: "#FFFFFF",
-            border: "1px solid #E0F2FE",
+            border: "1px solid #E5E7EB",
             borderRadius: 12,
             padding: 20,
             marginBottom: 24,
-            boxShadow: "0 4px 12px rgba(48, 175, 255, 0.06)",
+            boxShadow: "0 1px 3px rgba(0, 0, 0, 0.03)",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-            <UserPlus size={18} color="#0284C7" />
-            <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "#334155" }}>
+            <UserPlus size={18} color="#6D28D9" />
+            <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "#1E293B" }}>
               Add Member to Project
             </h2>
           </div>
@@ -298,10 +301,12 @@ const MembersPage: React.FC = () => {
                 flex: "1",
                 minWidth: "200px",
                 padding: "8px 12px",
-                borderRadius: 6,
-                border: "1px solid #CBD5E1",
+                borderRadius: 8,
+                border: "1px solid #E5E7EB",
                 fontSize: 14,
                 outline: "none",
+                backgroundColor: "#FFFFFF",
+                color: "#1E293B",
               }}
             >
               {users.map((u: any) => (
@@ -316,11 +321,13 @@ const MembersPage: React.FC = () => {
               onChange={(e) => setNewRole(e.target.value as any)}
               style={{
                 padding: "8px 12px",
-                borderRadius: 6,
-                border: "1px solid #CBD5E1",
+                borderRadius: 8,
+                border: "1px solid #E5E7EB",
                 fontSize: 14,
                 outline: "none",
                 fontWeight: 500,
+                backgroundColor: "#FFFFFF",
+                color: "#1E293B",
               }}
             >
               <option value="MEMBER">MEMBER (Can edit & add)</option>
@@ -336,15 +343,17 @@ const MembersPage: React.FC = () => {
                 alignItems: "center",
                 gap: 6,
                 padding: "9px 18px",
-                background: "linear-gradient(135deg, #008be3 0%, #30AFFF 100%)",
+                backgroundColor: "#8B5CF6",
                 color: "white",
                 border: "none",
-                borderRadius: 7,
+                borderRadius: 8,
                 fontSize: 13,
                 fontWeight: 600,
                 cursor: "pointer",
-                boxShadow: "0 4px 10px rgba(48, 175, 255, 0.25)",
+                transition: "background-color 0.15s ease",
               }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#7C3AED")}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#8B5CF6")}
             >
               <UserPlus size={15} />
               <span>{addMemberMutation.isPending ? "Adding..." : "Add Member"}</span>
@@ -357,13 +366,13 @@ const MembersPage: React.FC = () => {
       <section
         style={{
           backgroundColor: "#FFFFFF",
-          border: "1px solid #E2E8F0",
+          border: "1px solid #E5E7EB",
           borderRadius: 10,
           padding: 24,
           boxShadow: "0 1px 3px rgba(0,0,0,0.03)",
         }}
       >
-        <h2 style={{ margin: "0 0 16px 0", fontSize: 16, fontWeight: 600, color: "#334155" }}>
+        <h2 style={{ margin: "0 0 16px 0", fontSize: 16, fontWeight: 600, color: "#1E293B" }}>
           Current Members ({members.length})
         </h2>
 
@@ -396,7 +405,7 @@ const MembersPage: React.FC = () => {
                 padding: "12px 16px",
                 borderRadius: 8,
                 backgroundColor: "#F8FAFC",
-                border: "1px solid #E2E8F0",
+                border: "1px solid #E5E7EB",
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -405,19 +414,20 @@ const MembersPage: React.FC = () => {
                     width: 36,
                     height: 36,
                     borderRadius: "50%",
-                    backgroundColor: "#E2E8F0",
-                    color: "#475569",
+                    backgroundColor: "#EDE9FE",
+                    color: "#6D28D9",
+                    border: "1px solid #DDD6FE",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    fontWeight: 600,
+                    fontWeight: 700,
                     fontSize: 14,
                   }}
                 >
                   {(m.user?.displayName || m.user?.email || "U").charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <div style={{ fontWeight: 600, color: "#334155", fontSize: 14 }}>
+                  <div style={{ fontWeight: 600, color: "#1E293B", fontSize: 14 }}>
                     {m.user?.displayName || m.user?.email}
                   </div>
                   <div style={{ fontSize: 12, color: "#64748B" }}>{m.user?.email}</div>
@@ -437,9 +447,9 @@ const MembersPage: React.FC = () => {
                         })
                       }
                       style={{
-                        padding: "4px 8px",
+                        padding: "6px 10px",
                         borderRadius: 6,
-                        border: "1px solid #CBD5E1",
+                        border: "1px solid #E5E7EB",
                         fontSize: 13,
                         fontWeight: 500,
                         backgroundColor: "#FFFFFF",
@@ -489,8 +499,9 @@ const MembersPage: React.FC = () => {
                       fontSize: 12,
                       padding: "4px 10px",
                       borderRadius: 6,
-                      backgroundColor: "#E2E8F0",
-                      color: "#334155",
+                      backgroundColor: "#EDE9FE",
+                      color: "#6D28D9",
+                      border: "1px solid #DDD6FE",
                       fontWeight: 600,
                     }}
                   >

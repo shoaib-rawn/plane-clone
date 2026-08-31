@@ -11,7 +11,9 @@ import Dashboard from "../pages/Dashboard";
 import ProjectsPage from "../pages/ProjectsPage";
 import MembersPage from "../pages/MembersPage";
 import MyTicketsPage from "../pages/MyTicketsPage";
+import SettingsPage from "../pages/SettingsPage";
 import ProfilePage from "../pages/ProfilePage";
+import ProjectTicketsPage from "../pages/ProjectTicketsPage";
 
 import AppLayout from "../components/AppLayout";
 
@@ -75,6 +77,10 @@ const AppRoutes = () => {
               element: <ProjectsPage />,
             },
             {
+              path: "/projects/:projectId/tickets",
+              element: <ProjectTicketsPage />,
+            },
+            {
               path: "/members",
               element: <MembersPage />,
             },
@@ -84,7 +90,7 @@ const AppRoutes = () => {
             },
             {
               path: "/settings",
-              element: <ProfilePage />,
+              element: <SettingsPage />,
             },
             {
               path: "/profile",

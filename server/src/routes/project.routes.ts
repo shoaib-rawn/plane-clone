@@ -11,6 +11,7 @@ import { Router } from 'express';
 import {
   createProjectController,
   getProjectsController,
+  getProjectByIdController,
   updateProjectController,
   archiveProjectController,
   unarchiveProjectController,
@@ -26,6 +27,7 @@ export const projectRouter = Router();
 
 projectRouter.post('/', requireAuth, createProjectController);
 projectRouter.get('/', requireAuth, getProjectsController);
+projectRouter.get('/:projectId', requireAuth, getProjectByIdController);
 
 projectRouter.patch(
   '/:projectId',

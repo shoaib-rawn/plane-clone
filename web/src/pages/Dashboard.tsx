@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Layers, ListTodo, Timer, Flame } from "lucide-react";
+import { Layers, ListTodo, Timer, Flame, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { getProjects } from "../features/projects/api/projectApi";
 import { getMyTickets } from "../features/tickets/api/ticketApi";
-import TicketDetailModal from "../components/TicketDetailModal";
+import TicketDonutChart from "../components/TicketDonutChart";
 import { useAuth } from "../context/AuthContext";
 import "../styling/Dashboard.css";
 
 const Dashboard: React.FC = () => {
   const { userName } = useAuth();
-  const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const [donutFilter, setDonutFilter] = useState<string | null>(null);
 
   // 1. Fetch projects list
   const { data: projectsRes, isLoading: loadingProjects } = useQuery<any>({
@@ -30,20 +32,21 @@ const Dashboard: React.FC = () => {
   const totalProjects = projects.length;
   const totalTickets = tickets.length;
   const openTickets = tickets.filter((t: any) => {
-    const g = t.state?.group?.toLowerCase();
+    const g = (t.state?.group || "").toLowerCase();
+    const n = (t.state?.name || "").toLowerCase();
     return (
       g === "backlog" ||
       g === "unstarted" ||
       g === "started" ||
-      g === "todo" ||
-      g === "in_progress" ||
-      g === "in progress"
+      n === "todo" ||
+      n.includes("progress")
     );
   }).length;
 
-  const urgentTickets = tickets.filter(
-    (t: any) => t.priority === "URGENT" || t.priority === "HIGH"
-  ).length;
+  const urgentTickets = tickets.filter((t: any) => {
+    const p = (t.priority || "").toUpperCase();
+    return p === "URGENT" || p === "HIGH";
+  }).length;
 
   const formatDate = () => {
     return new Date().toLocaleDateString("en-US", {
@@ -118,60 +121,39 @@ const Dashboard: React.FC = () => {
 
       {/* Main Content Layout */}
       <div className="dashboard-content">
-        {/* Left: My Tickets */}
-        <section className="dashboard-section main-section">
-          <div className="section-header">
-            <h3>My Assigned Tickets</h3>
-            <span className="badge-count">{totalTickets}</span>
-          </div>
-
-          {tickets.length === 0 ? (
-            <div className="empty-state">
-              <p>No tickets assigned to you yet.</p>
-            </div>
-          ) : (
-            <ul className="ticket-list">
-              {tickets.slice(0, 8).map((ticket: any) => (
-                <li
-                  key={ticket.id}
-                  className="ticket-row clickable"
-                  onClick={() => setSelectedTicketId(ticket.id)}
-                  title="Click to view details, discussion & activity"
-                  style={{ cursor: "pointer" }}
-                >
-                  <span className="ticket-key">
-                    {ticket.key || `${ticket.project?.key}-${ticket.sequenceId}`}
-                  </span>
-                  <div className="ticket-details">
-                    <span className="ticket-title">{ticket.title}</span>
-                    <div className="ticket-meta">
-                      <span className={`priority-badge ${(ticket.priority || "NONE").toLowerCase()}`}>
-                        {ticket.priority || "NONE"}
-                      </span>
-                      {ticket.state && (
-                        <span
-                          className="state-indicator"
-                          style={{
-                            borderColor: ticket.state.colour,
-                            backgroundColor: `${ticket.state.colour}10`,
-                            color: ticket.state.colour,
-                          }}
-                        >
-                          {ticket.state.name}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
+        {/* Left: Clean Interactive Donut Chart */}
+        <section className="dashboard-section main-section" style={{ padding: "16px" }}>
+          <TicketDonutChart
+            tickets={tickets}
+            selectedFilter={donutFilter}
+            onSelectFilter={setDonutFilter}
+          />
         </section>
 
-        {/* Right: Workspace Projects */}
+        {/* Right: Workspace Projects Overview */}
         <section className="dashboard-section sidebar-section">
           <div className="section-header">
             <h3>Projects Overview</h3>
+            <button
+              type="button"
+              onClick={() => navigate("/projects")}
+              style={{
+                background: "transparent",
+                border: "none",
+                color: "#6D28D9",
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
+                padding: "2px 6px",
+                borderRadius: 4,
+              }}
+            >
+              <span>All Projects</span>
+              <ArrowRight size={13} />
+            </button>
           </div>
 
           {projects.length === 0 ? (
@@ -181,7 +163,13 @@ const Dashboard: React.FC = () => {
           ) : (
             <ul className="project-list">
               {projects.map((proj: any) => (
-                <li key={proj.id} className="project-row-item">
+                <li
+                  key={proj.id}
+                  className="project-row-item"
+                  onClick={() => navigate(`/projects/${proj.id}/tickets`)}
+                  style={{ cursor: "pointer" }}
+                  title="Open Kanban Board"
+                >
                   <div className="project-row-header">
                     <h4>{proj.name}</h4>
                     <span className="project-key-tag">{proj.key}</span>
@@ -195,14 +183,6 @@ const Dashboard: React.FC = () => {
           )}
         </section>
       </div>
-
-      {/* Ticket Details & Discussion Modal */}
-      {selectedTicketId && (
-        <TicketDetailModal
-          issueId={selectedTicketId}
-          onClose={() => setSelectedTicketId(null)}
-        />
-      )}
     </div>
   );
 };

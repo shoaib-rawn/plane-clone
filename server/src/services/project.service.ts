@@ -206,6 +206,81 @@ export async function getProjectsForUser(userId: string) {
   return result;
 }
 
+export async function getProjectById(userId: string, projectId: string) {
+  const workspaceMember = await prisma.workspaceMember.findFirst({
+    where: { userId },
+    select: { workspaceId: true, role: true },
+  });
+
+  if (!workspaceMember) {
+    throw NotFoundError('User does not belong to any workspace');
+  }
+
+  const { workspaceId, role: workspaceRole } = workspaceMember;
+
+  const project = await prisma.project.findFirst({
+    where: {
+      id: projectId,
+      workspaceId,
+      deletedAt: null,
+    },
+    include: {
+      members: {
+        where: { userId },
+      },
+      states: {
+        orderBy: { position: 'asc' },
+      },
+    },
+  });
+
+  if (!project) {
+    throw NotFoundError('Project not found');
+  }
+
+  let myRole: string;
+  if (workspaceRole === 'ADMIN') {
+    myRole = 'ADMIN';
+  } else {
+    const membership = project.members[0];
+    myRole = membership ? membership.role : 'VIEWER';
+  }
+
+  const [openIssuesCount, doneIssuesCount] = await Promise.all([
+    prisma.issue.count({
+      where: {
+        projectId: project.id,
+        deletedAt: null,
+        state: {
+          group: {
+            notIn: ['completed', 'cancelled'],
+          },
+        },
+      },
+    }),
+    prisma.issue.count({
+      where: {
+        projectId: project.id,
+        deletedAt: null,
+        state: {
+          group: {
+            in: ['completed'],
+          },
+        },
+      },
+    }),
+  ]);
+
+  const { members, ...projectData } = project;
+
+  return {
+    ...projectData,
+    myRole,
+    openIssuesCount,
+    doneIssuesCount,
+  };
+}
+
 import { UpdateProjectInput } from '../schemas/project.schema.js';
 import { UnprocessableError } from '../lib/errors.js';
 

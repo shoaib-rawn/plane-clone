@@ -9,7 +9,11 @@ import "./styling/global.css";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 5, // 5 minutes: cached data stays fresh and prevents duplicate network calls
+      gcTime: 1000 * 60 * 15,   // 15 minutes in memory
+      refetchOnWindowFocus: false, // Do not refetch on window/tab focus
+      refetchOnMount: false,       // Use cache instantly on route navigation
+      refetchOnReconnect: false,   // Do not spam on network reconnect
       retry: 1,
     },
   },
