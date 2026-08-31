@@ -190,11 +190,6 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 
     onSettled: () => {
       setUpdatingTicketId(null);
-      // Refetch to ensure client and server are completely synchronized
-      queryClient.invalidateQueries({
-        queryKey: ["projectTickets", projectId],
-      });
-      queryClient.invalidateQueries({ queryKey: ["projects"] });
     },
   });
 
@@ -294,7 +289,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
         </div>
 
         {/* Drag Overlay provides smooth visual feedback during dragging */}
-        <DragOverlay>
+        <DragOverlay dropAnimation={null}>
           {activeTicket ? (
             <div className="kanban-card kanban-card-overlay">
               <div className="kanban-card-header">
@@ -306,6 +301,18 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
                 </span>
               </div>
               <h3 className="kanban-card-title">{activeTicket.title}</h3>
+              <div className="kanban-card-footer">
+                <div className="card-assignee">
+                  <div className="assignee-avatar">
+                    {activeTicket.assignee?.displayName
+                      ? activeTicket.assignee.displayName.slice(0, 2).toUpperCase()
+                      : "U"}
+                  </div>
+                  <span className="assignee-name">
+                    {activeTicket.assignee?.displayName || "Unassigned"}
+                  </span>
+                </div>
+              </div>
             </div>
           ) : null}
         </DragOverlay>

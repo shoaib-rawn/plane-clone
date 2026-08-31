@@ -1,21 +1,28 @@
+import { lazy, Suspense } from "react";
 import { Navigate, useRoutes } from "react-router-dom";
 
 import PublicRoute from "./PublicRoute";
 import PrivateRoute from "./PrivateRoute";
-
-import LoginPage from "../pages/LoginPage";
-import RegisterPage from "../pages/RegisterPage";
-import ForgotPasswordPage from "../pages/ForgotPasswordPage";
-import ResetPasswordPage from "../pages/ResetPasswordPage";
-import Dashboard from "../pages/Dashboard";
-import ProjectsPage from "../pages/ProjectsPage";
-import MembersPage from "../pages/MembersPage";
-import MyTicketsPage from "../pages/MyTicketsPage";
-import SettingsPage from "../pages/SettingsPage";
-import ProfilePage from "../pages/ProfilePage";
-import ProjectTicketsPage from "../pages/ProjectTicketsPage";
-
 import AppLayout from "../components/AppLayout";
+
+// Route-based Code Splitting with React.lazy
+const LoginPage = lazy(() => import("../pages/LoginPage"));
+const RegisterPage = lazy(() => import("../pages/RegisterPage"));
+const ForgotPasswordPage = lazy(() => import("../pages/ForgotPasswordPage"));
+const ResetPasswordPage = lazy(() => import("../pages/ResetPasswordPage"));
+const Dashboard = lazy(() => import("../pages/Dashboard"));
+const ProjectsPage = lazy(() => import("../pages/ProjectsPage"));
+const MembersPage = lazy(() => import("../pages/MembersPage"));
+const MyTicketsPage = lazy(() => import("../pages/MyTicketsPage"));
+const SettingsPage = lazy(() => import("../pages/SettingsPage"));
+const ProfilePage = lazy(() => import("../pages/ProfilePage"));
+const ProjectTicketsPage = lazy(() => import("../pages/ProjectTicketsPage"));
+
+const RouteFallback = () => (
+  <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <div style={{ width: 32, height: 32, border: "3px solid #E2E8F0", borderTopColor: "#8B5CF6", borderRadius: "50%", animation: "spin 0.8s linear infinite" }}></div>
+  </div>
+);
 
 const AppRoutes = () => {
   const routes = [
@@ -29,7 +36,9 @@ const AppRoutes = () => {
       path: "/login",
       element: (
         <PublicRoute>
-          <LoginPage />
+          <Suspense fallback={<RouteFallback />}>
+            <LoginPage />
+          </Suspense>
         </PublicRoute>
       ),
     },
@@ -38,7 +47,9 @@ const AppRoutes = () => {
       path: "/register",
       element: (
         <PublicRoute>
-          <RegisterPage />
+          <Suspense fallback={<RouteFallback />}>
+            <RegisterPage />
+          </Suspense>
         </PublicRoute>
       ),
     },
@@ -47,7 +58,9 @@ const AppRoutes = () => {
       path: "/forgot-password",
       element: (
         <PublicRoute>
-          <ForgotPasswordPage />
+          <Suspense fallback={<RouteFallback />}>
+            <ForgotPasswordPage />
+          </Suspense>
         </PublicRoute>
       ),
     },
@@ -56,7 +69,9 @@ const AppRoutes = () => {
       path: "/reset-password",
       element: (
         <PublicRoute>
-          <ResetPasswordPage />
+          <Suspense fallback={<RouteFallback />}>
+            <ResetPasswordPage />
+          </Suspense>
         </PublicRoute>
       ),
     },
@@ -70,31 +85,59 @@ const AppRoutes = () => {
           children: [
             {
               path: "/dashboard",
-              element: <Dashboard />,
+              element: (
+                <Suspense fallback={<RouteFallback />}>
+                  <Dashboard />
+                </Suspense>
+              ),
             },
             {
               path: "/projects",
-              element: <ProjectsPage />,
+              element: (
+                <Suspense fallback={<RouteFallback />}>
+                  <ProjectsPage />
+                </Suspense>
+              ),
             },
             {
               path: "/projects/:projectId/tickets",
-              element: <ProjectTicketsPage />,
+              element: (
+                <Suspense fallback={<RouteFallback />}>
+                  <ProjectTicketsPage />
+                </Suspense>
+              ),
             },
             {
               path: "/members",
-              element: <MembersPage />,
+              element: (
+                <Suspense fallback={<RouteFallback />}>
+                  <MembersPage />
+                </Suspense>
+              ),
             },
             {
               path: "/my-tickets",
-              element: <MyTicketsPage />,
+              element: (
+                <Suspense fallback={<RouteFallback />}>
+                  <MyTicketsPage />
+                </Suspense>
+              ),
             },
             {
               path: "/settings",
-              element: <SettingsPage />,
+              element: (
+                <Suspense fallback={<RouteFallback />}>
+                  <SettingsPage />
+                </Suspense>
+              ),
             },
             {
               path: "/profile",
-              element: <ProfilePage />,
+              element: (
+                <Suspense fallback={<RouteFallback />}>
+                  <ProfilePage />
+                </Suspense>
+              ),
             },
           ],
         },

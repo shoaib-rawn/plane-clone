@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getMe, logoutUser } from "../features/auth/api/authApi";
 import type { User, WorkspaceRole } from "../types";
 
@@ -20,81 +21,72 @@ export interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 /**
- * AuthProvider: Manages authenticated session using secure httpOnly cookies
+ * AuthProvider: Manages authenticated session using React Query and HttpOnly cookies
  */
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [userName, setUserName] = useState<string>("");
-  const [workspaceRole, setWorkspaceRole] = useState<WorkspaceRole | null>(null);
-  const [user, setUser] = useState<User | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const queryClient = useQueryClient();
 
-  // 1. Initial Session Check: Verify session cookie via GET /api/v1/auth/me
-  useEffect(() => {
-    let isMounted = true;
+  // 1. Initial Session Check: React Query GET /api/v1/auth/me
+  const {
+    data: meData,
+    isLoading,
+    isPending,
+    isError,
+  } = useQuery({
+    queryKey: ["currentUser"],
+    queryFn: getMe,
+    retry: false,
+    staleTime: 1000 * 60 * 5, // 5 minutes fresh in cache
+  });
 
-    const initializeAuth = async () => {
-      try {
-        const res = await getMe();
-        if (!isMounted) return;
-        const meUser = res.data.user;
-        const meRole = res.data.workspaceRole;
+  const isAuthLoading = isPending || isLoading;
+  const meUser = meData?.data?.user;
+  const meRole = meData?.data?.workspaceRole;
 
-        setUser(meUser as User);
-        setUserName(meUser.displayName || "");
-        setWorkspaceRole(meRole);
-        setIsAuthenticated(true);
-      } catch (err) {
-        if (!isMounted) return;
-        setUser(null);
-        setUserName("");
-        setWorkspaceRole(null);
-        setIsAuthenticated(false);
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
+  const user: User | null = meUser ? (meUser as User) : null;
+  const userName = meUser?.displayName || "";
+  const workspaceRole: WorkspaceRole | null = meRole || null;
+  const isAuthenticated = !isError && !!meUser;
 
-    initializeAuth();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  // 2. Login Handler: Updates in-memory state (Cookie is handled automatically by browser)
+  // 2. Login Handler: Updates in-memory currentUser cache
   const login = (loginData: { displayName: string; workspaceRole: WorkspaceRole }) => {
-    setUserName(loginData.displayName);
-    setWorkspaceRole(loginData.workspaceRole);
-    setUser({ displayName: loginData.displayName, role: loginData.workspaceRole });
-    setIsAuthenticated(true);
+    queryClient.setQueryData(["currentUser"], (old: any) => {
+      if (old?.data?.user) return old;
+      return {
+        data: {
+          user: { displayName: loginData.displayName },
+          workspaceRole: loginData.workspaceRole,
+        },
+      };
+    });
   };
 
-  // 3. Logout Handler: Calls POST /auth/logout to clear cookie on server and resets state
+  // 3. Logout Handler: Calls POST /auth/logout, clears session and cache
   const logout = async () => {
     try {
       await logoutUser();
     } catch (err) {
       console.warn("Logout request completed with notice:", err);
     } finally {
-      setUser(null);
-      setUserName("");
-      setWorkspaceRole(null);
-      setIsAuthenticated(false);
+      queryClient.setQueryData(["currentUser"], null);
+      queryClient.removeQueries({ queryKey: ["currentUser"] });
+      queryClient.clear();
     }
   };
 
-  // 4. Update Profile: Sync display name in state
+  // 4. Update Profile: Sync display name in React Query cache
   const updateUser = (updates: { displayName?: string; workspaceRole?: WorkspaceRole }) => {
-    if (updates.displayName !== undefined) {
-      setUserName(updates.displayName);
-      setUser((prev) => (prev ? { ...prev, displayName: updates.displayName! } : { displayName: updates.displayName! }));
-    }
-    if (updates.workspaceRole !== undefined) {
-      setWorkspaceRole(updates.workspaceRole);
-    }
+    queryClient.setQueryData(["currentUser"], (old: any) => {
+      if (!old?.data) return old;
+      return {
+        ...old,
+        data: {
+          ...old.data,
+          user: updates.displayName !== undefined ? { ...old.data.user, displayName: updates.displayName } : old.data.user,
+          workspaceRole: updates.workspaceRole !== undefined ? updates.workspaceRole : old.data.workspaceRole,
+        },
+      };
+    });
   };
 
   return (
@@ -104,7 +96,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         userName,
         workspaceRole,
         isAuthenticated,
-        isLoading,
+        isLoading: isAuthLoading,
         login,
         logout,
         updateUser,

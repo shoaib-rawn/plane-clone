@@ -11,12 +11,6 @@ export const apiClient = async <T = Record<string, unknown>>(
 ): Promise<T> => {
   const headers = new Headers(options.headers ?? {});
 
-  // Fallback to Bearer token if token exists in localStorage
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-  if (token && !headers.has("Authorization")) {
-    headers.set("Authorization", `Bearer ${token}`);
-  }
-
   // Set JSON content-type if body is object
   if (
     options.body !== undefined &&
