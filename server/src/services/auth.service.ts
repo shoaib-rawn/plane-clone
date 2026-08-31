@@ -68,7 +68,10 @@ export async function loginUser(input: LoginInput): Promise<{ user: PublicUser; 
   });
 
   const passwordHashToVerify = user ? user.passwordHash : DUMMY_HASH;
-  const isPasswordValid = await verifyPassword(input.password, passwordHashToVerify);
+  const isPasswordValid = await verifyPassword(
+    input.password,
+    passwordHashToVerify,
+  );
 
   if (!user || !isPasswordValid || !user.isActive) {
     throw UnauthorizedError('Invalid email or password', 'INVALID_CREDENTIALS');
@@ -88,7 +91,10 @@ import { generateResetToken, verifyResetToken } from '../lib/auth.js';
 import { sendPasswordResetEmail } from '../lib/mailer.js';
 import { BadRequestError } from '../lib/errors.js';
 
-export async function requestPasswordReset(email: string, clientOrigin?: string) {
+export async function requestPasswordReset(
+  email: string,
+  clientOrigin?: string,
+) {
   const user = await prisma.user.findUnique({
     where: { email },
   });
@@ -103,9 +109,14 @@ export async function requestPasswordReset(email: string, clientOrigin?: string)
       console.log(`[MAILER] Reset link: ${resetLink}`);
 
       await sendPasswordResetEmail(user.email, resetLink, user.displayName);
-      console.log(`[MAILER] Password reset email successfully dispatched to Mailtrap for: ${user.email}`);
+      console.log(
+        `[MAILER] Password reset email successfully dispatched to Mailtrap for: ${user.email}`,
+      );
     } catch (err) {
-      console.error('[MAILER ERROR] Failed to send password reset email via Mailtrap:', err);
+      console.error(
+        '[MAILER ERROR] Failed to send password reset email via Mailtrap:',
+        err,
+      );
     }
   } else {
     console.log(`[MAILER] Reset requested for email not in database: ${email}`);
@@ -113,7 +124,8 @@ export async function requestPasswordReset(email: string, clientOrigin?: string)
 
   // Consistent message to prevent email enumeration
   return {
-    message: 'If an account with that email exists, a password reset link has been sent to your inbox.',
+    message:
+      'If an account with that email exists, a password reset link has been sent to your inbox.',
   };
 }
 
@@ -123,7 +135,10 @@ export async function resetPassword(token: string, newPassword: string) {
     const verified = verifyResetToken(token);
     userId = verified.userId;
   } catch {
-    throw BadRequestError('Invalid or expired password reset token', 'INVALID_RESET_TOKEN');
+    throw BadRequestError(
+      'Invalid or expired password reset token',
+      'INVALID_RESET_TOKEN',
+    );
   }
 
   const user = await prisma.user.findUnique({
@@ -131,7 +146,10 @@ export async function resetPassword(token: string, newPassword: string) {
   });
 
   if (!user || !user.isActive) {
-    throw BadRequestError('User account is invalid or inactive', 'USER_NOT_FOUND');
+    throw BadRequestError(
+      'User account is invalid or inactive',
+      'USER_NOT_FOUND',
+    );
   }
 
   const newPasswordHash = await hashPassword(newPassword);
@@ -144,7 +162,7 @@ export async function resetPassword(token: string, newPassword: string) {
   });
 
   return {
-    message: 'Password reset successfully. You may now log in with your new password.',
+    message:
+      'Password reset successfully. You may now log in with your new password.',
   };
 }
-

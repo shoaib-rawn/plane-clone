@@ -15,7 +15,7 @@ interface TokenPayload {
 export async function requireAuth(
   req: Request,
   _res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
     // 1. Extract token from httpOnly cookie first, then fallback to Authorization header
@@ -36,11 +36,17 @@ export async function requireAuth(
     try {
       payload = jwt.verify(token, config.jwt.secret) as TokenPayload;
     } catch {
-      throw UnauthorizedError('Invalid or expired authentication token', 'UNAUTHORIZED');
+      throw UnauthorizedError(
+        'Invalid or expired authentication token',
+        'UNAUTHORIZED',
+      );
     }
 
     if (!payload.userId) {
-      throw UnauthorizedError('Invalid authentication token payload', 'UNAUTHORIZED');
+      throw UnauthorizedError(
+        'Invalid authentication token payload',
+        'UNAUTHORIZED',
+      );
     }
 
     const user = await prisma.user.findUnique({
@@ -48,12 +54,16 @@ export async function requireAuth(
     });
 
     if (!user || !user.isActive) {
-      throw UnauthorizedError('User account is invalid or inactive', 'UNAUTHORIZED');
+      throw UnauthorizedError(
+        'User account is invalid or inactive',
+        'UNAUTHORIZED',
+      );
     }
 
     req.user = {
       id: user.id,
       email: user.email,
+      role: user.role,
     };
 
     next();

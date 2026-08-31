@@ -8,6 +8,7 @@ declare global {
       user?: {
         id: string;
         email: string;
+        role: string;
       };
       projectRole?: ProjectRole;
     }
