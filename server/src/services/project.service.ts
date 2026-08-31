@@ -8,48 +8,59 @@
 //   • Setting the default 'Todo' state as the project's `defaultStateId`
 // All of these steps keep business logic in the service layer (Downwards‑Only architecture).
 // ------------------------------------------------------------
+import crypto from 'crypto';
 import { prisma } from '../lib/prisma.js';
 import { DEFAULT_STATES } from '../lib/defaultStates.js';
 import { CreateProjectInput } from '../schemas/project.schema.js';
 import { ConflictError, NotFoundError, ForbiddenError } from '../lib/errors.js';
 
 export async function createProject(userId: string, input: CreateProjectInput) {
-  // Perform ALL database reads and writes in a single atomic $transaction
-  const project = await prisma.$transaction(async (tx) => {
-    // 1. Get workspace membership for user inside transaction
-    const workspaceMember = await tx.workspaceMember.findFirst({
-      where: { userId },
-      select: { workspaceId: true, role: true },
-    });
+  // 1. Get workspace membership for user outside transaction
+  const workspaceMember = await prisma.workspaceMember.findFirst({
+    where: { userId },
+    select: { workspaceId: true, role: true },
+  });
 
-    if (!workspaceMember) {
-      throw NotFoundError('User does not belong to any workspace');
-    }
+  if (!workspaceMember) {
+    throw NotFoundError('User does not belong to any workspace');
+  }
 
-    if (workspaceMember.role !== 'ADMIN') {
-      throw ForbiddenError('Only workspace administrators can create projects');
-    }
+  if (workspaceMember.role !== 'ADMIN') {
+    throw ForbiddenError('Only workspace administrators can create projects');
+  }
 
-    const workspaceId = workspaceMember.workspaceId;
+  const workspaceId = workspaceMember.workspaceId;
 
-    // 2. Check if key already exists in this workspace inside transaction
-    const existingProject = await tx.project.findUnique({
-      where: {
-        workspaceId_key: {
-          workspaceId,
-          key: input.key,
-        },
+  // 2. Check if key already exists in this workspace outside transaction
+  const existingProject = await prisma.project.findUnique({
+    where: {
+      workspaceId_key: {
+        workspaceId,
+        key: input.key,
       },
-    });
+    },
+  });
 
-    if (existingProject) {
-      throw ConflictError(
-        `Project key '${input.key}' already exists in this workspace`,
-        'PROJECT_KEY_TAKEN'
-      );
-    }
+  if (existingProject) {
+    throw ConflictError(
+      `Project key '${input.key}' already exists in this workspace`,
+      'PROJECT_KEY_TAKEN'
+    );
+  }
 
-    // 3. Create the project record
+  // Pre-generate UUIDs for default states so we can insert project with defaultStateId directly!
+  const todoStateId = crypto.randomUUID();
+  const stateIds: Record<string, string> = {
+    'Backlog': crypto.randomUUID(),
+    'Todo': todoStateId,
+    'In Progress': crypto.randomUUID(),
+    'Done': crypto.randomUUID(),
+    'Cancelled': crypto.randomUUID(),
+  };
+
+  // Perform ONLY sequential writes inside transaction
+  const project = await prisma.$transaction(async (tx) => {
+    // 3. Create the project record with defaultStateId already populated!
     const newProject = await tx.project.create({
       data: {
         workspaceId,
@@ -58,27 +69,21 @@ export async function createProject(userId: string, input: CreateProjectInput) {
         description: input.description,
         createdById: userId,
         issueCounter: 0,
+        defaultStateId: todoStateId,
       },
     });
 
-    // 4. Seed the 5 default issue states for this project
-    let todoStateId: string | null = null;
-
-    for (const state of DEFAULT_STATES) {
-      const createdState = await tx.issueState.create({
-        data: {
-          projectId: newProject.id,
-          name: state.name,
-          group: state.group,
-          colour: state.colour,
-          position: state.position,
-        },
-      });
-
-      if (state.name === 'Todo') {
-        todoStateId = createdState.id;
-      }
-    }
+    // 4. Seed the 5 default issue states in a single bulk INSERT query (createMany)
+    await tx.issueState.createMany({
+      data: DEFAULT_STATES.map((state) => ({
+        id: stateIds[state.name],
+        projectId: newProject.id,
+        name: state.name,
+        group: state.group,
+        colour: state.colour,
+        position: state.position,
+      })),
+    });
 
     // 5. Assign creator as Project Admin
     await tx.projectMember.create({
@@ -89,10 +94,9 @@ export async function createProject(userId: string, input: CreateProjectInput) {
       },
     });
 
-    // 6. Update project with defaultStateId
-    const updatedProject = await tx.project.update({
+    // Fetch states to return
+    const finalProject = await tx.project.findUnique({
       where: { id: newProject.id },
-      data: { defaultStateId: todoStateId },
       include: {
         states: {
           orderBy: { position: 'asc' },
@@ -100,7 +104,7 @@ export async function createProject(userId: string, input: CreateProjectInput) {
       },
     });
 
-    return updatedProject;
+    return finalProject!;
   }, {
     maxWait: 10000,
     timeout: 20000,
