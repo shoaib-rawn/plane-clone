@@ -19,6 +19,8 @@ export async function registerUser(input: RegisterInput): Promise<{ user: Public
     throw ConflictError('An account with this email already exists', 'EMAIL_TAKEN');
   }
 
+  const assignedRole = input.role || 'MEMBER';
+
   // 2. Run sequential writes inside transaction
   const user = await prisma.$transaction(async (tx) => {
     const newUser = await tx.user.create({
@@ -26,6 +28,7 @@ export async function registerUser(input: RegisterInput): Promise<{ user: Public
         email: input.email,
         displayName: input.displayName,
         passwordHash,
+        role: assignedRole,
       },
     });
 
@@ -34,7 +37,7 @@ export async function registerUser(input: RegisterInput): Promise<{ user: Public
         data: {
           workspaceId: workspace.id,
           userId: newUser.id,
-          role: 'MEMBER',
+          role: assignedRole,
         },
       });
     }
@@ -46,7 +49,7 @@ export async function registerUser(input: RegisterInput): Promise<{ user: Public
 
   return {
     user: toPublicUser(user),
-    workspaceRole: 'MEMBER' as const,
+    workspaceRole: assignedRole,
     token,
   };
 }

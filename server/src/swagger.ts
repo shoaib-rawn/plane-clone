@@ -73,7 +73,8 @@ export const swaggerDocument = {
                 "properties": {
                   "email": { "type": "string", "format": "email" },
                   "password": { "type": "string", "minLength": 8 },
-                  "displayName": { "type": "string", "minLength": 1, "maxLength": 100 }
+                  "displayName": { "type": "string", "minLength": 1, "maxLength": 100 },
+                  "role": { "type": "string", "enum": ["ADMIN", "MEMBER"], "default": "MEMBER", "description": "Optional workspace role (defaults to MEMBER)" }
                 }
               }
             }
