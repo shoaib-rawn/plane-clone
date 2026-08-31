@@ -1,6 +1,11 @@
 // server/src/controllers/auth.controller.ts
 import { Request, Response } from 'express';
-import { registerSchema, loginSchema } from '../schemas/auth.schema.js';
+import {
+  registerSchema,
+  loginSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+} from '../schemas/auth.schema.js';
 import * as authService from '../services/auth.service.js';
 import * as userService from '../services/user.service.js';
 import { prisma } from '../lib/prisma.js';
@@ -18,21 +23,16 @@ const COOKIE_OPTIONS = {
 
 export const registerController = asyncHandler(
   async (req: Request, res: Response) => {
-    const userRole = req.user?.role;
-
-    if (userRole !== 'ADMIN') {
-      return res.status(403).json({
-        message: 'Only Admin is allowed to create user',
-      });
-    }
-
     const validatedBody = registerSchema.parse(req.body);
     const result = await authService.registerUser(validatedBody);
 
     res.cookie('token', result.token, COOKIE_OPTIONS);
 
     return res.status(201).json({
-      data: result,
+      data: {
+        user: result.user,
+        workspaceRole: result.workspaceRole,
+      },
     });
   },
 );
@@ -45,7 +45,10 @@ export const loginController = asyncHandler(
     res.cookie('token', result.token, COOKIE_OPTIONS);
 
     return res.status(200).json({
-      data: result,
+      data: {
+        user: result.user,
+        workspaceRole: result.workspaceRole,
+      },
     });
   },
 );
@@ -86,11 +89,6 @@ export const getMeController = asyncHandler(
     });
   },
 );
-
-import {
-  forgotPasswordSchema,
-  resetPasswordSchema,
-} from '../schemas/auth.schema.js';
 
 export const forgotPasswordController = asyncHandler(
   async (req: Request, res: Response) => {

@@ -1,4 +1,6 @@
-// server/src/index.ts
+import dns from 'dns';
+dns.setDefaultResultOrder('ipv4first');
+
 import { config } from './config/env.js';
 import { app } from './app.js';
 

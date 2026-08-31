@@ -9,13 +9,13 @@ import {
   resetPasswordController,
 } from '../controllers/auth.controller.js';
 import { requireAuth } from '../middleware/requireAuth.js';
-import { authRateLimiter } from '../middleware/rateLimiter.js';
 
 export const authRouter = Router();
 
-authRouter.post('/create-user', requireAuth, registerController);
-authRouter.post('/login', authRateLimiter, loginController);
+authRouter.post('/register', registerController);
+authRouter.post('/create-user', registerController);
+authRouter.post('/login', loginController);
 authRouter.post('/logout', logoutController);
-authRouter.post('/forgot-password', authRateLimiter, forgotPasswordController);
-authRouter.post('/reset-password', authRateLimiter, resetPasswordController);
+authRouter.post('/forgot-password', forgotPasswordController);
+authRouter.post('/reset-password', resetPasswordController);
 authRouter.get('/me', requireAuth, getMeController);

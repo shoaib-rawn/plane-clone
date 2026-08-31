@@ -53,6 +53,7 @@ model WorkspaceMember {
 
   @@unique([workspaceId, userId])
   @@index([userId])
+  @@index([workspaceId])
   @@map("workspace_members")
 }
 
@@ -77,6 +78,7 @@ model Project {
 
   @@unique([workspaceId, key])
   @@index([workspaceId])
+  @@index([createdById])
   @@map("projects")
 }
 
@@ -94,6 +96,8 @@ model ProjectMember {
 
   @@unique([projectId, userId])
   @@index([userId])
+  @@index([projectId])
+  @@index([addedById])
   @@map("project_members")
 }
 
@@ -139,6 +143,8 @@ model Issue {
   @@index([projectId, stateId])
   @@index([projectId, assigneeId])
   @@index([assigneeId])
+  @@index([createdById])
+  @@index([stateId])
   @@map("issues")
 }
 
@@ -154,6 +160,7 @@ model IssueComment {
   issue     Issue     @relation(fields: [issueId], references: [id], onDelete: Cascade)
 
   @@index([issueId])
+  @@index([authorId])
   @@map("issue_comments")
 }
 
@@ -170,6 +177,7 @@ model IssueActivity {
   issue     Issue    @relation(fields: [issueId], references: [id], onDelete: Cascade)
 
   @@index([issueId, createdAt])
+  @@index([actorId])
   @@map("issue_activities")
 }
 

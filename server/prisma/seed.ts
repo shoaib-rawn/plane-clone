@@ -1,4 +1,6 @@
-// server/prisma/seed.ts
+import dotenv from 'dotenv';
+dotenv.config();
+
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import { DEFAULT_STATES } from '../src/lib/defaultStates';

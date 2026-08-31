@@ -38,7 +38,10 @@ describe('Week 4: Issue Management & Filtering Integration Tests (Days 16-19)', 
       const res = await request(app)
         .post('/api/v1/auth/register')
         .send({ email, password: 'Password123!', displayName: name });
-      return { token: res.body.data.token, user: res.body.data.user };
+      const cookie = res.headers['set-cookie']?.[0] || '';
+      const tokenMatch = cookie.match(/token=([^;]+)/);
+      const token = tokenMatch ? tokenMatch[1] : '';
+      return { token, user: res.body.data.user };
     };
 
     const admin = await registerUser(`admin_m_${suffix}@test.local`, 'Admin User');

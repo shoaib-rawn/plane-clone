@@ -73,7 +73,8 @@ export const swaggerDocument = {
                 "properties": {
                   "email": { "type": "string", "format": "email" },
                   "password": { "type": "string", "minLength": 8 },
-                  "displayName": { "type": "string", "minLength": 1, "maxLength": 100 }
+                  "displayName": { "type": "string", "minLength": 1, "maxLength": 100 },
+                  "role": { "type": "string", "enum": ["ADMIN", "MEMBER"], "default": "MEMBER", "description": "Optional workspace role (defaults to MEMBER)" }
                 }
               }
             }
@@ -91,8 +92,7 @@ export const swaggerDocument = {
                       "type": "object",
                       "properties": {
                         "user": { "$ref": "#/components/schemas/PublicUser" },
-                        "workspaceRole": { "type": "string" },
-                        "token": { "type": "string" }
+                        "workspaceRole": { "type": "string" }
                       }
                     }
                   }
@@ -115,7 +115,7 @@ export const swaggerDocument = {
       "post": {
         "tags": ["Authentication"],
         "summary": "Login User",
-        "description": "Authenticates credentials and returns a JWT session token.",
+        "description": "Authenticates credentials and returns user details. Sets httpOnly session cookie.",
         "requestBody": {
           "required": true,
           "content": {
@@ -143,8 +143,7 @@ export const swaggerDocument = {
                       "type": "object",
                       "properties": {
                         "user": { "$ref": "#/components/schemas/PublicUser" },
-                        "workspaceRole": { "type": "string" },
-                        "token": { "type": "string" }
+                        "workspaceRole": { "type": "string" }
                       }
                     }
                   }
