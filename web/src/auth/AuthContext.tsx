@@ -1,12 +1,8 @@
 import React, { createContext, useContext } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getMe, logoutUser } from "../features/auth/api/authApi";
+import { getMe, logoutUser } from "./authApi";
 import type { User, WorkspaceRole } from "../types";
 
-/**
- * Authentication Context Contract
- * Supports secure httpOnly cookie sessions with zero localStorage vulnerability
- */
 export interface AuthContextType {
   user: User | null;
   userName: string;
@@ -20,26 +16,16 @@ export interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-/**
- * AuthProvider: Manages authenticated session using React Query and HttpOnly cookies
- */
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const queryClient = useQueryClient();
 
-  // 1. Initial Session Check: React Query GET /api/v1/auth/me
-  const {
-    data: meData,
-    isLoading,
-    isPending,
-    isError,
-  } = useQuery({
+  const { data: meData, isLoading, isError } = useQuery({
     queryKey: ["currentUser"],
     queryFn: getMe,
     retry: false,
-    staleTime: 1000 * 60 * 5, // 5 minutes fresh in cache
+    staleTime: 1000 * 60 * 5,
   });
 
-  const isAuthLoading = isPending || isLoading;
   const meUser = meData?.data?.user;
   const meRole = meData?.data?.workspaceRole;
 
@@ -48,20 +34,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const workspaceRole: WorkspaceRole | null = meRole || null;
   const isAuthenticated = !isError && !!meUser;
 
-  // 2. Login Handler: Updates in-memory currentUser cache
   const login = (loginData: { displayName: string; workspaceRole: WorkspaceRole }) => {
-    queryClient.setQueryData(["currentUser"], (old: any) => {
-      if (old?.data?.user) return old;
-      return {
-        data: {
-          user: { displayName: loginData.displayName },
-          workspaceRole: loginData.workspaceRole,
-        },
-      };
+    queryClient.setQueryData(["currentUser"], {
+      data: {
+        user: { displayName: loginData.displayName },
+        workspaceRole: loginData.workspaceRole,
+      },
     });
   };
 
-  // 3. Logout Handler: Calls POST /auth/logout, clears session and cache
   const logout = async () => {
     try {
       await logoutUser();
@@ -74,7 +55,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // 4. Update Profile: Sync display name in React Query cache
   const updateUser = (updates: { displayName?: string; workspaceRole?: WorkspaceRole }) => {
     queryClient.setQueryData(["currentUser"], (old: any) => {
       if (!old?.data) return old;
@@ -96,7 +76,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         userName,
         workspaceRole,
         isAuthenticated,
-        isLoading: isAuthLoading,
+        isLoading,
         login,
         logout,
         updateUser,
@@ -107,9 +87,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
-/**
- * Custom Hook: useAuth()
- */
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) {

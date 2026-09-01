@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import type { TicketDetails } from "../features/tickets/api/ticketApi";
+import type { TicketDetails } from "../types";
 
 interface TicketDonutChartProps {
   tickets: TicketDetails[];

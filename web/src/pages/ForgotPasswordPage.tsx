@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import { CheckSquare, LoaderCircle, ArrowLeft, Mail, CheckCircle2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import FormInput from "../components/FormInput";
-import { isValidEmail } from "../features/auth/utils/validation";
-import { forgotPassword } from "../features/auth/api/authApi";
+import { isValidEmail, forgotPassword } from "../auth";
 import "../styling/LoginPage.css";
 
 const ForgotPasswordPage: React.FC = () => {

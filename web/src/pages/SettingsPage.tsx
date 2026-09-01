@@ -12,16 +12,17 @@ import {
   Archive,
   Trash2,
 } from "lucide-react";
-import { getCurrentProfile, updateCurrentProfile } from "../features/users/api/userApi";
 import {
+  getCurrentProfile,
+  updateCurrentProfile,
   getProjects,
   updateProject,
   archiveProject,
   unarchiveProject,
   deleteProject,
-  type ProjectItem,
-} from "../features/projects/api/projectApi";
-import { useAuth } from "../context/AuthContext";
+} from "../api";
+import type { ProjectItem } from "../types";
+import { useAuth } from "../auth";
 
 const SettingsPage: React.FC = () => {
   const queryClient = useQueryClient();

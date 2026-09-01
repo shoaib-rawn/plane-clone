@@ -2,10 +2,9 @@ import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Layers, ListTodo, Timer, Flame, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { getProjects } from "../features/projects/api/projectApi";
-import { getMyTickets } from "../features/tickets/api/ticketApi";
+import { getProjects, getMyTickets } from "../api";
 import TicketDonutChart from "../components/TicketDonutChart";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../auth";
 import "../styling/Dashboard.css";
 
 const Dashboard: React.FC = () => {

@@ -19,19 +19,17 @@ import {
   getIssueById,
   updateIssue,
   deleteIssue,
-  type IssuePriority,
-} from "../features/tickets/api/ticketApi";
-import {
   getIssueComments,
   addIssueComment,
   updateIssueComment,
   deleteIssueComment,
-  type IssueComment,
-} from "../features/comments/api/commentApi";
-import { getIssueActivities, type IssueActivity } from "../features/activities/api/activityApi";
-import { getAllUsers, getCurrentProfile } from "../features/users/api/userApi";
-import { getProjectDetails } from "../features/projects/api/projectApi";
-import { useAuth } from "../context/AuthContext";
+  getIssueActivities,
+  getAllUsers,
+  getCurrentProfile,
+  getProjectDetails,
+} from "../api";
+import type { IssuePriority, IssueComment, IssueActivity } from "../types";
+import { useAuth } from "../auth";
 import "../styling/TicketDetailModal.css";
 
 interface TicketDetailModalProps {

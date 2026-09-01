@@ -6,10 +6,10 @@ import {
   addProjectMember,
   updateProjectMemberRole,
   removeProjectMember,
-  type ProjectItem,
-} from "../features/projects/api/projectApi";
-import { getAllUsers } from "../features/users/api/userApi";
-import { useAuth } from "../context/AuthContext";
+  getAllUsers,
+} from "../api";
+import type { ProjectItem } from "../types";
+import { useAuth } from "../auth";
 import {
   Users,
   UserPlus,

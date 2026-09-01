@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getMyTickets, type TicketDetails } from "../features/tickets/api/ticketApi";
+import { getMyTickets } from "../api";
+import type { TicketDetails } from "../types";
 import { ListTodo, AlertCircle, Calendar } from "lucide-react";
 import TicketDetailModal from "../components/TicketDetailModal";
 

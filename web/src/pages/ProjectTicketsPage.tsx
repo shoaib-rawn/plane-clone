@@ -12,14 +12,8 @@ import {
   Clock,
   ListTodo,
 } from "lucide-react";
-import {
-  getProjectDetails,
-  type ProjectItem,
-} from "../features/projects/api/projectApi";
-import {
-  getProjectTickets,
-  type TicketDetails,
-} from "../features/tickets/api/ticketApi";
+import { getProjectDetails, getProjectTickets } from "../api";
+import type { ProjectItem, TicketDetails } from "../types";
 import KanbanBoard from "../components/kanban/KanbanBoard";
 import CreateTicketModal from "../components/CreateTicketModal";
 import TicketDetailModal from "../components/TicketDetailModal";
