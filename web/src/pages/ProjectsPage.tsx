@@ -1,15 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  getProjects,
-  createProject,
-  type ProjectItem,
-} from "../features/projects/api/projectApi";
-import { getProjectTickets, type TicketDetails } from "../features/tickets/api/ticketApi";
+import { getProjects, createProject, getProjectTickets } from "../api";
+import type { ProjectItem, TicketDetails } from "../types";
 import CreateTicketModal from "../components/CreateTicketModal";
 import TicketDetailModal from "../components/TicketDetailModal";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../auth";
 import {
   Layers,
   Plus,

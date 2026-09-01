@@ -2,7 +2,7 @@ import React from "react";
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { Calendar, User } from "lucide-react";
-import type { TicketDetails } from "../../features/tickets/api/ticketApi";
+import type { TicketDetails } from "../../types";
 
 interface KanbanCardProps {
   ticket: TicketDetails;

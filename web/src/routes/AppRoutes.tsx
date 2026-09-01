@@ -3,11 +3,12 @@ import { Navigate, useRoutes } from "react-router-dom";
 
 import PublicRoute from "./PublicRoute";
 import PrivateRoute from "./PrivateRoute";
+import AdminRoute from "./AdminRoute";
 import AppLayout from "../components/AppLayout";
 
 // Route-based Code Splitting with React.lazy
 const LoginPage = lazy(() => import("../pages/LoginPage"));
-const RegisterPage = lazy(() => import("../pages/RegisterPage"));
+const CreateMemberPage = lazy(() => import("../pages/CreateMemberPage"));
 const ForgotPasswordPage = lazy(() => import("../pages/ForgotPasswordPage"));
 const ResetPasswordPage = lazy(() => import("../pages/ResetPasswordPage"));
 const Dashboard = lazy(() => import("../pages/Dashboard"));
@@ -30,6 +31,10 @@ const AppRoutes = () => {
       path: "/",
       element: <Navigate to="/login" replace />,
     },
+    {
+      path: "/register",
+      element: <Navigate to="/create-member" replace />,
+    },
 
     // Public Routes
     {
@@ -38,17 +43,6 @@ const AppRoutes = () => {
         <PublicRoute>
           <Suspense fallback={<RouteFallback />}>
             <LoginPage />
-          </Suspense>
-        </PublicRoute>
-      ),
-    },
-
-    {
-      path: "/register",
-      element: (
-        <PublicRoute>
-          <Suspense fallback={<RouteFallback />}>
-            <RegisterPage />
           </Suspense>
         </PublicRoute>
       ),
@@ -113,6 +107,16 @@ const AppRoutes = () => {
                 <Suspense fallback={<RouteFallback />}>
                   <MembersPage />
                 </Suspense>
+              ),
+            },
+            {
+              path: "/create-member",
+              element: (
+                <AdminRoute>
+                  <Suspense fallback={<RouteFallback />}>
+                    <CreateMemberPage />
+                  </Suspense>
+                </AdminRoute>
               ),
             },
             {

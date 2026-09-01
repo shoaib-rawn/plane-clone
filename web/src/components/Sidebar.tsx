@@ -9,9 +9,10 @@ import {
   Settings,
   CircleUserRound,
   Users2,
+  UserPlus,
   type LucideIcon,
 } from "lucide-react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../auth";
 import "../styling/layout/Sidebar.css";
 
 type NavItem = {
@@ -27,14 +28,24 @@ const primaryNavigation: NavItem[] = [
   { to: "/my-tickets", label: "My Tickets", icon: Ticket, iconColor: "#38BDF8" },
 ];
 
-const workspaceNavigation: NavItem[] = [
-  { to: "/members", label: "Members", icon: Users2, iconColor: "#EC4899" },
-  { to: "/settings", label: "Settings", icon: Settings, iconColor: "#FB923C" },
-];
-
 const Sidebar = () => {
-  const { userName, logout } = useAuth();
+  const { userName, workspaceRole, logout } = useAuth();
   const navigate = useNavigate();
+
+  const workspaceNavigation: NavItem[] = [
+    { to: "/members", label: "Members", icon: Users2, iconColor: "#EC4899" },
+    ...(workspaceRole === "ADMIN"
+      ? [
+          {
+            to: "/create-member",
+            label: "Create Member",
+            icon: UserPlus,
+            iconColor: "#8B5CF6",
+          },
+        ]
+      : []),
+    { to: "/settings", label: "Settings", icon: Settings, iconColor: "#FB923C" },
+  ];
 
   const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
     return localStorage.getItem("sidebar_collapsed") === "true";

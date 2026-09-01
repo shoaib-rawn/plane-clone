@@ -1,79 +1,68 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { CheckSquare, LoaderCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import FormInput from "../components/FormInput";
-
-import {
-  hasMinimumPasswordLength,
-  isValidEmail,
-} from "../features/auth/utils/validation";
-
+import { isValidEmail, hasMinimumPasswordLength, loginUser, useAuth } from "../auth";
 import "../styling/LoginPage.css";
-import { useLogin } from "../features/auth/hooks/useLogin";
 
-interface FieldErrors {
-  email?: string;
-  password?: string;
-}
-
-const LoginPage = () => {
+const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { login } = useAuth();
 
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [error, setError] = useState<string>("");
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
 
-  const loginMutation = useLogin();
+  const loginMutation = useMutation({
+    mutationFn: loginUser,
+    onSuccess: (res) => {
+      const user = res.data.user;
+      const workspaceRole = res.data.workspaceRole;
 
-  const handleSignIn = (e: React.FormEvent<HTMLFormElement>): void => {
+      queryClient.setQueryData(["currentUser"], {
+        data: { user, workspaceRole },
+      });
+
+      login({
+        displayName: user.displayName,
+        workspaceRole,
+      });
+
+      navigate("/dashboard");
+    },
+    onError: (err: any) => {
+      setError(err.message || "Invalid credentials");
+    },
+  });
+
+  const handleSignIn = (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Clear old errors
     setError("");
     setFieldErrors({});
 
-    // Required fields
     if (!email.trim() || !password) {
       setError("Email and password are required.");
       return;
     }
 
-    // Email validation
     if (!isValidEmail(email)) {
-      setFieldErrors({
-        email: "Please enter a valid email address.",
-      });
+      setFieldErrors({ email: "Please enter a valid email address." });
       return;
     }
 
-    // Password validation
-    if (!hasMinimumPasswordLength(password)) {
-      setFieldErrors({
-        password: "Password must be at least 8 characters.",
-      });
+    if (!hasMinimumPasswordLength(password, 8)) {
+      setFieldErrors({ password: "Password must be at least 8 characters." });
       return;
     }
 
-    // API call
-    loginMutation.mutate(
-      {
-        email: email.trim(),
-        password,
-      },
-      {
-        onSuccess: () => {
-          setError("");
-          setFieldErrors({});
-          navigate("/dashboard");
-        },
-
-        onError: (error) => {
-          setError(error.message);
-        },
-      },
-    );
+    loginMutation.mutate({
+      email: email.trim(),
+      password,
+    });
   };
 
   return (
@@ -83,7 +72,6 @@ const LoginPage = () => {
           <div className="brand-logo">
             <CheckSquare size={28} strokeWidth={2.5} />
           </div>
-
           <h1>Planora</h1>
         </div>
 
@@ -101,14 +89,10 @@ const LoginPage = () => {
             value={email}
             autoComplete="email"
             error={fieldErrors.email}
-            onChange={(event) => {
-              setEmail(event.target.value);
+            onChange={(e) => {
+              setEmail(e.target.value);
               setError("");
-
-              setFieldErrors((previous) => ({
-                ...previous,
-                email: undefined,
-              }));
+              setFieldErrors((prev) => ({ ...prev, email: undefined }));
             }}
           />
 
@@ -119,21 +103,18 @@ const LoginPage = () => {
             placeholder="Enter your password"
             value={password}
             autoComplete="current-password"
-            error={fieldErrors.password}
             showPasswordToggle
             isPasswordVisible={showPassword}
-            onTogglePassword={() => setShowPassword((current) => !current)}
-            onChange={(event) => {
-              setPassword(event.target.value);
+            error={fieldErrors.password}
+            onTogglePassword={() => setShowPassword((prev) => !prev)}
+            onChange={(e) => {
+              setPassword(e.target.value);
               setError("");
-
-              setFieldErrors((previous) => ({
-                ...previous,
-                password: undefined,
-              }));
+              setFieldErrors((prev) => ({ ...prev, password: undefined }));
             }}
           />
-          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "-6px", marginBottom: "6px" }}>
+
+          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "-4px" }}>
             <button
               type="button"
               onClick={() => navigate("/forgot-password")}
@@ -145,10 +126,7 @@ const LoginPage = () => {
                 fontWeight: 600,
                 cursor: "pointer",
                 padding: 0,
-                transition: "color 0.15s ease",
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#7C3AED")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "#6D28D9")}
             >
               Forgot password?
             </button>
@@ -171,14 +149,6 @@ const LoginPage = () => {
             )}
           </button>
         </form>
-
-        <div className="register-text">
-          <span>No account yet?</span>
-
-          <button type="button" onClick={() => navigate("/register")}>
-            Create one
-          </button>
-        </div>
       </div>
     </div>
   );

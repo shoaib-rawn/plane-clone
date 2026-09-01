@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { CheckSquare, LoaderCircle, CheckCircle2, Lock } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import FormInput from "../components/FormInput";
-import { hasMinimumPasswordLength } from "../features/auth/utils/validation";
-import { resetPassword } from "../features/auth/api/authApi";
+import { hasMinimumPasswordLength, resetPassword } from "../auth";
 import "../styling/LoginPage.css";
 
 const ResetPasswordPage: React.FC = () => {

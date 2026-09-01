@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { createTicket } from "../features/tickets/api/ticketApi";
-import { getProjectMembers } from "../features/projects/api/projectApi";
+import { createTicket, getProjectMembers } from "../api";
 import { X, LoaderCircle } from "lucide-react";
 
 interface CreateTicketModalProps {

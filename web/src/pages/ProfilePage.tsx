@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { User, Mail, Shield, CheckCircle2, AlertCircle } from "lucide-react";
-import { getCurrentProfile, updateCurrentProfile } from "../features/users/api/userApi";
-import { useAuth } from "../context/AuthContext";
+import { getCurrentProfile, updateCurrentProfile } from "../api";
+import { useAuth } from "../auth";
 
 const ProfilePage: React.FC = () => {
   const queryClient = useQueryClient();

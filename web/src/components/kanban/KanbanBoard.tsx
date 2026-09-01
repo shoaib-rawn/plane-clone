@@ -10,11 +10,8 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  updateIssue,
-  type TicketDetails,
-} from "../../features/tickets/api/ticketApi";
-import type { ProjectState } from "../../features/projects/api/projectApi";
+import { updateIssue } from "../../api";
+import type { TicketDetails, ProjectState } from "../../types";
 import KanbanColumn, { type ColumnId } from "./KanbanColumn";
 import "../../styling/KanbanBoard.css";
 

@@ -6,8 +6,8 @@ import {
   archiveProject,
   unarchiveProject,
   deleteProject,
-  type ProjectItem,
-} from "../features/projects/api/projectApi";
+} from "../api";
+import type { ProjectItem } from "../types";
 import "../styling/ProjectSettingsModal.css";
 
 interface ProjectSettingsModalProps {

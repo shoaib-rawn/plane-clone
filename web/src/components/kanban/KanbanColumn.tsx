@@ -1,7 +1,7 @@
 import React from "react";
 import { useDroppable } from "@dnd-kit/core";
 import KanbanCard from "./KanbanCard";
-import type { TicketDetails } from "../../features/tickets/api/ticketApi";
+import type { TicketDetails } from "../../types";
 
 export type ColumnId = "todo" | "in_progress" | "complete";
 
